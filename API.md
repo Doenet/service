@@ -44,17 +44,25 @@ worksheet.recordProgress(0.75);
 "Progress" is a pairing between worksheets and learners.
 
 ## GET /users/:user
+
+get information about a user
+
 ## PUT /users/:user
 ## PATCH /users/:user
 
-get a user or update a user
+update a user.
+
+## GET /users/:user/authentication
+
+Log in as the given user.  Password is sent in the `Authorization:
+Basic` header.  Responds by setting a cookie containing a JWT.
 
 ## POST /learners/:user/worksheets/:worksheet/statements
 ## POST /learners/:user/worksheets/:worksheet/progress
 
-record a learner event (like an xAPI statement or progress).
+Record a learner event (like an xAPI statement or progress).
 
-If no cookie is set, a set-cookie is sent
+If no cookie is set, a set-cookie is sent for a guest user.
 
 ## PUT /learners/:user/worksheets/:worksheet/state
 
@@ -113,3 +121,12 @@ The "Origin" header is also used to determine the true worksheet id.
 A learner is a user, and it could be `me` meaning the current user
 (i.e., from the cookie), could be an email address (meaning a string
 containing @) which must be globally unique, or a base64 (mongo) id.
+
+# What about people who aren't logged in?
+
+When POSTing to `/learners/me/worksheets/:worksheet/progress`, it is
+possible that there is no JWT cookie.  In this case, we manufacture a
+"guest" user (with no password...) and set the cookie.
+
+A guest user has no ability to log in (e.g., a guest has no password!)
+and depends on the JWT token as proof-of-identity.

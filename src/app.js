@@ -1,10 +1,13 @@
 import express from 'express';
-import path from 'path';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
+import router from './routes';
+
 const app = express();
+
+app.use( '/v1', router );
 
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,6 +29,4 @@ app.use((err, req, res, next) => {
   else { res.status(500).json({ message: 'Something looks wrong :( !!!' }); }
 });
 
-app.listen(4000, () => {
-  console.log('Node server listening on port 4000');
-});
+export default app;

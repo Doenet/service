@@ -2,11 +2,12 @@
   "name": "@doenet/lrs",
   "version": "0.0.1",
   "description": "Learner record store and page state store",
-  "main": "src/app.js",
+  "main": "src/index.js",
   "scripts": {
+    "test": "mocha --require @babel/register",
     "start": "npm run production",
-    "server": "babel-node ./src/app",
-    "server:production": "node ./dist/app",
+    "server": "babel-node ./src/index",
+    "server:production": "node ./dist/index",
     "dev": "NODE_ENV=development npm-run-all server",
     "clean": "rimraf dist",
     "build": "babel ./src --out-dir dist",
@@ -29,6 +30,9 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/node": "^7.4.5",
-    "@babel/preset-env": "^7.4.5"
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4"
   }
 }
