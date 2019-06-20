@@ -5,21 +5,21 @@ import * as userController from './controllers/users';
 // ## GET /users/:user
 // 
 // get information about a user
-router.get('/users/:user', userController.get);
+router.get('/users/:user', userController.findUser, userController.get);
 
 // ## PUT /users/:user
 // ## PATCH /users/:user
 //
 // update a user.
-router.put('/users/:user', userController.put);
-router.patch('/users/:user', userController.put);
+router.put('/users/:user', userController.findUser, userController.put);
+router.patch('/users/:user', userController.findUser, userController.put);
 
 // ## GET /users/:user/authentication
 //
 // Log in as the given user.  Password is sent in the `Authorization:
 // Basic` header.  Responds by setting a cookie containing a JWT.
 
-router.get('/users/:user/authentication', userController.authenticate);
+router.get('/users/:user/token', userController.findUser, userController.token);
 
 // ## POST /learners/:user/worksheets/:worksheet/statements
 // ## POST /learners/:user/worksheets/:worksheet/progress

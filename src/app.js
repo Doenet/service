@@ -7,7 +7,9 @@ import router from './routes';
 
 const app = express();
 
-app.use( '/v1', router );
+app.use( '/', router );
+
+app.set('secretKey','notvertysecret');
 
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));

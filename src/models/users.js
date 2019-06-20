@@ -1,9 +1,7 @@
-import mongoose from 'mongoose';
+import { model, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-const saltRounds = 17; // the best number
-
-const Schema = mongoose.Schema;
+const saltRounds = 10;
 
 const UserSchema = new Schema({
   // this name is purely for decorative purposes, e.g., in a gradebook
@@ -14,7 +12,6 @@ const UserSchema = new Schema({
     type: String,
     trim: true,
     required: true,
-    index: true, // because we permit user look-ups based on email
     unique: true    
   },
 
@@ -30,6 +27,9 @@ const UserSchema = new Schema({
   },
 });
 
+// because we permit user look-ups based on email
+UserSchema.index({"email": 1});
+
 // hash user password before database save
 UserSchema.pre('save', function(next){
   if (!this.isModified('password')) {
@@ -43,4 +43,4 @@ UserSchema.pre('save', function(next){
   return next();
 });
 
-export default mongoose.model('User', UserSchema);
+export default model('User', UserSchema);

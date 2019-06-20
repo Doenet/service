@@ -1,26 +1,53 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import userModel from '../models/users.js';
+import userModel from '../models/users';
 
-export function get(req, res, next) {
-  userModel.findById(req.userId, function (err, user) {
+export function findUser( req, res, next ) {
+  function handleUser (err, user ) {
     if (err) {
-      res.sendStatus(500);
+      next(err);
     } else {
       if (user) {
-        delete user.password;
-        res.json(user);
+        req.user = user;
+        next();
       } else {
-        res.status(404);
+        res.status(404).send('User not found');            
       }
     }
-  });    
+  }
+  
+  if (req.params.user) {
+    if (req.params.user == 'me') {
+      // BADBAD: deal with the jwt user
+      req.user = req.jwt.user;
+      next();
+    } else {
+      // if we are searching by email
+      if (req.params.user.indexOf('@') >= 0) {
+        userModel.findOne( {email:req.params.user}, handleUser );
+      } else {
+        // otherwise we are searching by user id
+        userModel.findById(req.params.user, handleUser );
+      }
+    }
+  } else {
+    res.status(404).send('User not found');
+  }
+}
+
+export function get(req, res, next) {
+  if (req.user) {
+    delete req.user.password;
+    res.json(req.user);
+  } else {
+    res.sendStatus(404);
+  }
 }
   
 export function put(req, res, next) {
   userModel.findById(req.userId).exec(function (err, user) {
     if (err) {
-      res.status(500);
+      res.sendStatus(500);
     } else {
       if (user) {
         if (req.body.name) {
@@ -32,33 +59,33 @@ export function put(req, res, next) {
             res.json(user);
           })
           .catch( function(err) {
-            res.status(500);
+            res.sendStatus(500);
           });
       } else {
-        res.status(404);
+        res.sendStatus(404);
       }
     }
   });
 }
 
 
-export function authenticate(req, res, next) {
-  /*
-    userModel.findOne({email:req.body.email}, function(err, userInfo){
-      if (err) {
-        next(err);
+export function token(req, res, next) {
+  const auth = (req.headers.authorization || '').split(' ')[1] || '';
+  const [login, password] = new Buffer(auth, 'base64').toString().split(':');
+
+  if (login != req.params.user) {
+    res.sendStatus(500);
+  } else {
+    if (req.user && req.user.password) {
+      if (bcrypt.compareSync(password, req.user.password)) {
+        const token = jwt.sign({id: req.user._id}, req.app.get('secretKey'), { expiresIn: '1h' });
+        delete req.user.password;
+        res.json(req.user);
       } else {
-        if (bcrypt.compareSync(req.body.password, userInfo.password)) {
-          const token = jwt.sign({id: userInfo._id}, req.app.get('secretKey'), { expiresIn: '1h' });
-          userInfo['password'] = undefined;
-          res.json({status:"success", message: "user found!!!", user: userInfo, token:token});
-          console.log("found ",userInfo);
-        } else {
-          res.status(401).json({status:"error", msgs: "Invalid credentials"});
-        }
+        res.status(401).send("Invalid credentials");
       }
-    });
-  */
+    }
+  }
 }
 
 
