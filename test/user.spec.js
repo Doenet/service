@@ -164,3 +164,47 @@ describe("GET /users/somebody@else.com", function() {
   });
 });
 
+describe("PUT /users/name@change.com", function() {
+  before(() => {
+    let user = new userModel({ name: 'Original Name', email:'name@change.com', password: 'abcde' });
+    return user.save();
+  });
+
+  let agent = chai.request.agent(app);
+  
+  before(() => {
+    return agent
+      .get("/users/name@change.com/token")
+      .auth('name@change.com', 'abcde');
+  });
+
+  it("originally has name Original Name", function() {
+    return agent
+      .get("/users/name@change.com")
+      .then(function (res) {
+        expect(res.body.name).to.eql('Original Name');
+      });
+  });
+
+  it("name is changed to New Name", function() {
+    return agent
+      .put("/users/name@change.com")
+      .send({name:"New Name"})
+      .then(function (res) {
+        expect(res.body.name).to.eql('New Name');
+      });
+  });  
+
+  it("still has New Name", function() {
+    return agent
+      .get("/users/name@change.com")
+      .then(function (res) {
+        expect(res.body.name).to.eql('New Name');
+      });
+  });
+
+  after( () => {
+    return agent.close();
+  });
+
+});
