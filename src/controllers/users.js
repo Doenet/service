@@ -44,40 +44,42 @@ export function get(req, res, next) {
         delete req.user.password;
         res.json(req.user);
       } else {
-        res.sendStatus(401);
+        res.status(403).send('Not permitted to view');
       }
     } else {
-      res.sendStatus(517);
+      res.status(401).send('Unauthenticated');      
     }
   } else {
-    res.sendStatus(404);
+    res.status(404).send('User not found');
   }
 }
   
 export function put(req, res, next) {
-  userModel.findById(req.userId).exec(function (err, user) {
-    if (err) {
-      res.sendStatus(500);
-    } else {
-      if (user) {
+  if (req.user) {
+    if (req.jwt && req.jwt.user) {
+      if (req.jwt.user.canEdit( req.user )) {
         if (req.body.name) {
-          user.name = req.body.name;
+          req.user.name = req.body.name;
         }
-    
-        user.save()
+
+        req.user.save()
           .then(function() {
-            res.json(user);
+            delete req.user.password;
+            res.json(req.user);
           })
           .catch( function(err) {
             res.sendStatus(500);
           });
       } else {
-        res.sendStatus(404);
+        res.status(403).send('Not permitted to edit');
       }
+    } else {
+      res.status(401).send('Unauthenticated');
     }
-  });
+  } else {
+    res.status(404).send('User not found');
+  }
 }
-
 
 export function token(req, res, next) {
   const auth = (req.headers.authorization || '').split(' ')[1] || '';

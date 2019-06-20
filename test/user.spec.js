@@ -133,18 +133,29 @@ describe("GET /users/somebody@else.com", function() {
   });  
   
   let agent = chai.request.agent(app);
-  
-  before(() => {
-    return agent
-      .get("/users/me@me.com/token")
-      .auth('me@me.com', 'abcd');
-  });
-  
-  it("does not return any information", function() {
+
+  it("returns 401 before authentication", function() {
     return agent
       .get("/users/somebody@else.com")
       .then(function (res) {
         expect(res).to.have.status(401);
+      });
+  });
+  
+  it("provides a token", function() {
+    return agent
+      .get("/users/me@me.com/token")
+      .auth('me@me.com', 'abcd')
+      .then(function (res) {
+        expect(res).to.have.cookie('token');
+      });
+  });
+  
+  it("returns 403 after authentication", function() {
+    return agent
+      .get("/users/somebody@else.com")
+      .then(function (res) {
+        expect(res).to.have.status(403);
       });
   });
 
@@ -152,3 +163,4 @@ describe("GET /users/somebody@else.com", function() {
     return agent.close();
   });
 });
+
