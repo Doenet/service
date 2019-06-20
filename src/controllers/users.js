@@ -19,7 +19,9 @@ export function findUser( req, res, next ) {
   if (req.params.user) {
     if (req.params.user == 'me') {
       // BADBAD: deal with the jwt user
-      req.user = req.jwt.user;
+      if (req.jwt && req.jwt.user) {
+        req.user = req.jwt.user;
+      }
       next();
     } else {
       // if we are searching by email
@@ -37,8 +39,16 @@ export function findUser( req, res, next ) {
 
 export function get(req, res, next) {
   if (req.user) {
-    delete req.user.password;
-    res.json(req.user);
+    if (req.jwt && req.jwt.user) {
+      if (req.jwt.user.canView( req.user )) {
+        delete req.user.password;
+        res.json(req.user);
+      } else {
+        res.sendStatus(401);
+      }
+    } else {
+      res.sendStatus(517);
+    }
   } else {
     res.sendStatus(404);
   }
@@ -80,6 +90,7 @@ export function token(req, res, next) {
       if (bcrypt.compareSync(password, req.user.password)) {
         const token = jwt.sign({id: req.user._id}, req.app.get('secretKey'), { expiresIn: '1h' });
         delete req.user.password;
+        res.cookie('token', token);
         res.json(req.user);
       } else {
         res.status(401).send("Invalid credentials");

@@ -1,3 +1,5 @@
+process.env.NODE_ENV = 'test';
+
 import { model, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -42,5 +44,18 @@ UserSchema.pre('save', function(next){
 
   return next();
 });
+
+
+UserSchema.methods.canView = function(anotherUser) {
+  if (this._id.equals(anotherUser._id)) return true;
+
+  return false;
+};
+
+UserSchema.methods.canEdit = function(anotherUser) {
+  if (this._id.equals(anotherUser._id)) return true;  
+
+  return false;
+};
 
 export default model('User', UserSchema);

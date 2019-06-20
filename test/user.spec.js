@@ -13,10 +13,9 @@ before(helper.before);
 after(helper.after);
 
 describe("GET /users/fake@fake.com/token", function() {
-  before((done) => {
+  before(() => {
     let user = new userModel({ name: 'Fake Person', email:'fake@fake.com', password: '1234' });
-    user.save()
-      .then(() => done());
+    return user.save();
   });
 
   it("provides a JWT token", function() {
@@ -26,6 +25,7 @@ describe("GET /users/fake@fake.com/token", function() {
       .auth('fake@fake.com', '1234')
       .then(function (res) {
         expect(res).to.have.status(200);
+        expect(res).to.have.cookie('token');
         expect(res.body.name).to.eql('Fake Person');
       });
   });
@@ -53,7 +53,7 @@ describe("GET /users/fake@fake.com/token", function() {
   it("fails with differently mismatched username", function() {
     return chai
       .request(app)
-      .get("/users/fake2@fake.com/token")
+      .get("/users/mismatch@fake.com/token")
       .auth('fake@fake.com', '1234')
       .then(function (res) {
         // because there is no user named fake2
@@ -63,54 +63,48 @@ describe("GET /users/fake@fake.com/token", function() {
   
 });
 
-describe("GET /users/fake@fake.com", function() {
-  before((done) => {
-    let user = new userModel({ name: 'Faker Person', email:'fake2@fake.com', password: 'abcd' });
-    user.save()
-      .then(() => done());
+describe("GET /users/fake2@fake.com", function() {
+  before(() => {
+    let user = new userModel({ name: 'Faker Person',
+                               email:'fake2@fake.com',
+                               password: 'abcd' });
+    return user.save();
   });
 
   let agent = chai.request.agent(app);
   
-  before((done) => {
-    agent
+  before(() => {
+    return agent
       .get("/users/fake2@fake.com/token")
-      .auth('fake2@fake.com', 'abcd')
-      .end(function (err,res) {
-        done();
-      });
+      .auth('fake2@fake.com', 'abcd');
   });
   
   it("returns the user's name", function() {
-    agent
+    return agent
       .get("/users/fake2@fake.com")
-      .end(function (err, res) {
+      .then(function (res) {
         expect(res).to.have.status(200);
         expect(res.body.name).to.eql('Faker Person');
       });
   });
 
   after( () => {
-    agent.close();
+    return agent.close();
   });
 });
 
 describe("GET /users/missing@person.com", function() {
-  before((done) => {
+  before(() => {
     let user = new userModel({ name: 'Also Me', email:'me2@me.com', password: 'abcd' });
-    user.save()
-      .then(() => done());
+    return user.save();
   });
 
   let agent = chai.request.agent(app);
   
-  before((done) => {
-    agent
+  before(() => {
+    return agent
       .get("/users/me2@me.com/token")
-      .auth('me2@me.com', 'abcd')
-      .end(function (err,res) {
-        done();
-      });
+      .auth('me2@me.com', 'abcd');
   });
 
   it("responds with 404", function() {
@@ -122,33 +116,28 @@ describe("GET /users/missing@person.com", function() {
   });
 
   after( () => {
-    agent.close();
+    return agent.close();
   });
 
 });
   
 describe("GET /users/somebody@else.com", function() {
-  before((done) => {
+  before(() => {
     let user = new userModel({ name: 'Me', email:'me@me.com', password: 'abcd' });
-    user.save()
-      .then(() => done());
+    return user.save();
   });
 
-  before((done) => {
+  before(() => {
     let user = new userModel({ name: 'Somebody Else', email:'somebody@else.com', password: 'abcd' });
-    user.save()
-      .then(() => done());
+    return user.save();
   });  
   
   let agent = chai.request.agent(app);
   
-  before((done) => {
-    agent
+  before(() => {
+    return agent
       .get("/users/me@me.com/token")
-      .auth('me@me.com', 'abcd')
-      .end(function (err,res) {
-        done();
-      });
+      .auth('me@me.com', 'abcd');
   });
   
   it("does not return any information", function() {
@@ -160,6 +149,6 @@ describe("GET /users/somebody@else.com", function() {
   });
 
   after( () => {
-    agent.close();
+    return agent.close();
   });
 });

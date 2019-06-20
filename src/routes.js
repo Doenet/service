@@ -1,6 +1,11 @@
 import express from 'express';
 const router = express.Router();
 import * as userController from './controllers/users';
+import identity from './middleware/identity';
+
+router.get('/users/:user/token', userController.findUser, userController.token);
+
+router.use( identity );
 
 // ## GET /users/:user
 // 
@@ -19,7 +24,7 @@ router.patch('/users/:user', userController.findUser, userController.put);
 // Log in as the given user.  Password is sent in the `Authorization:
 // Basic` header.  Responds by setting a cookie containing a JWT.
 
-router.get('/users/:user/token', userController.findUser, userController.token);
+
 
 // ## POST /learners/:user/worksheets/:worksheet/statements
 // ## POST /learners/:user/worksheets/:worksheet/progress
