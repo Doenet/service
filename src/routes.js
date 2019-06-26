@@ -1,7 +1,13 @@
 import express from 'express';
 const router = express.Router();
 import * as userController from './controllers/users';
+import * as learnerController from './controllers/learners';
 import identity from './middleware/identity';
+
+// ## GET /users/:user/authentication
+//
+// Log in as the given user.  Password is sent in the `Authorization:
+// Basic` header.  Responds by setting a cookie containing a JWT.
 
 router.get('/users/:user/token', userController.findUser, userController.token);
 
@@ -19,12 +25,14 @@ router.get('/users/:user', userController.findUser, userController.get);
 router.put('/users/:user', userController.findUser, userController.put);
 router.patch('/users/:user', userController.findUser, userController.put);
 
-// ## GET /users/:user/authentication
-//
-// Log in as the given user.  Password is sent in the `Authorization:
-// Basic` header.  Responds by setting a cookie containing a JWT.
+// ## PUT /learners/:user/progress
+// 
+// Record progress on this worksheet, as defined by the Referer header.
+// 
+// (Test to ensure that Origin is consistent with Referer.)
 
-
+router.put('/learners/:user/progress', userController.findUser, learnerController.putProgress);
+router.get('/learners/:user/progress', userController.findUser, learnerController.getProgress);
 
 // ## POST /learners/:user/worksheets/:worksheet/statements
 // ## POST /learners/:user/worksheets/:worksheet/progress

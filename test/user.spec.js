@@ -1,6 +1,8 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+
 import app from '../src/app';
+
 import userModel from '../src/models/users';
 
 chai.use(chaiHttp);
@@ -203,6 +205,15 @@ describe("PUT /users/name@change.com", function() {
       });
   });
 
+  it("responds to PATCH as well", function() {
+    return agent
+      .patch("/users/name@change.com")
+      .send({name:"Newer Name"})
+      .then(function (res) {
+        expect(res.body.name).to.eql('Newer Name');
+      });
+  });    
+  
   after( () => {
     return agent.close();
   });

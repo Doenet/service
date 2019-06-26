@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let mongoServer;
-const opts = {useCreateIndex: true, useNewUrlParser: true};
+const opts = {useFindAndModify: false, useCreateIndex: true, useNewUrlParser: true};
 
 export function before(done) {
   mongoServer = new MongoMemoryServer();

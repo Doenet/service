@@ -1,5 +1,3 @@
-process.env.NODE_ENV = 'test';
-
 import { model, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -57,5 +55,7 @@ UserSchema.methods.canEdit = function(anotherUser) {
 
   return false;
 };
+
+UserSchema.methods.canPutProgress = UserSchema.methods.canEdit;
 
 export default model('User', UserSchema);

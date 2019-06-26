@@ -57,16 +57,40 @@ update a user.
 Log in as the given user.  Password is sent in the `Authorization:
 Basic` header.  Responds by setting a cookie containing a JWT.
 
-## POST /learners/:user/worksheets/:worksheet/statements
-## POST /learners/:user/worksheets/:worksheet/progress
+## POST /worksheets
 
-Record a learner event (like an xAPI statement or progress).
+Create a new worksheet
 
-If no cookie is set, a set-cookie is sent for a guest user.
+Request: HEAD, examine response code: either 404 or 200. If you need
+the body, use GET.  It not available, perform a PUT or POST, the
+server should respond with 204 and the Location header with the URL of
+the newly created resource.
+
+## PUT /learners/:user/progress
+
+Record progress on this worksheet, as defined by the Referer header.
+
+(Test to ensure that Origin is consistent with Referer.)
+
+## GET /learners/:user/progress
+
+Record progress on this worksheet, as defined by the Referer header.
+
+(Test to ensure that Origin is consistent with Referer.)
+
+## PUT /learners/:user/worksheets/:worksheet/progress
+
+record progress on this worksheet
 
 ## PUT /learners/:user/worksheets/:worksheet/state
 
 Record the page state for the given worksheet.
+
+## POST /learners/:user/worksheets/:worksheet/statements
+
+Record a learner event (meaning an xAPI statement).
+
+If no cookie is set, a set-cookie is sent for a guest user.
 
 ## POST /courses/:course/learners/:user
 
