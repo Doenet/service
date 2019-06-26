@@ -68,6 +68,15 @@ describe("PUT /learners/:learner/progress", function() {
         expect(res).to.have.status(403);        
       });
   });
+
+  it("does not let random people view progress", function() {
+    return chai
+      .request(app)
+      .get("/learners/" + user._id + "/progress")
+      .then(function (res) {
+        expect(res).to.have.status(401);
+      });
+  });
   
   it("saves progress", function() {
     return agent
