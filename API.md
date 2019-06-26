@@ -52,7 +52,8 @@ get information about a user
 
 update a user.
 
-## GET /users/:user/token
+## GET /users/:user/token ![Implemented](https://img.shields.io/badge/implemented-yes-green.svg)
+
 
 Log in as the given user.  Password is sent in the `Authorization:
 Basic` header.  Responds by setting a cookie containing a JWT.
