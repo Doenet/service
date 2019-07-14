@@ -43,6 +43,9 @@ router.get('/learners/:user/progress', userController.findUser, learnerControlle
 // ## PUT /learners/:user/worksheets/:worksheet/state
 // Record the page state for the given worksheet.
 
+router.put('/learners/:user/state', userController.findUser, learnerController.putState);
+router.get('/learners/:user/state', userController.findUser, learnerController.getState);
+
 // ## POST /courses/:course/learners/:user
 // enroll a student in a course
 

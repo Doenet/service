@@ -1,44 +1,3 @@
-# The Javascript API
-
-## new doenet.Worksheet() 
-
-By default, the worksheet id is `window.location.path`. 
-
-## new doenet.Actor( { blah blah } )
-## new doenet.Verb( { blah blah } )
-## new doenet.Object( { blah blah } )
-## new doenet.Statement( { blah blah } )
-
-represents various xAPI nouns.  `new doenet.Actor()` on its own is the
-learner `me`.
-
-## worksheet.recordStatement( stmt ) 
-
-performs a cross-origin POST /learners/:user/worksheets/:worksheet/statements
-
-## worksheet.recordProgress( progress ) 
-
-performs a cross-origin POST /learners/:user/worksheets/:worksheet/progress
-
-## worksheet.saveState( db )
-
-Save `db` to the remote server.
-
-## worksheet.fetchState()
-
-Return a `Promise` that resolves to the previously saved `db` object.
-
-## worksheet.watchState()
-
-Somehow provide real-time updates?
-
-## Example
-
-```
-let worksheet = new doenet.Worksheet();
-worksheet.recordProgress(0.75);
-```
-
 # The RESTful API
 
 "Progress" is a pairing between worksheets and learners.
@@ -54,7 +13,6 @@ update a user.
 
 ## GET /users/:user/token ![Implemented](https://img.shields.io/badge/implemented-yes-green.svg)
 
-
 Log in as the given user.  Password is sent in the `Authorization:
 Basic` header.  Responds by setting a cookie containing a JWT.
 
@@ -68,24 +26,16 @@ server should respond with 204 and the Location header with the URL of
 the newly created resource.
 
 ## PUT /learners/:user/progress
-
-Record progress on this worksheet, as defined by the Referer header.
-
-(Test to ensure that Origin is consistent with Referer.)
-
 ## GET /learners/:user/progress
 
-Record progress on this worksheet, as defined by the Referer header.
+Retrieve or record progress on this worksheet, as defined by the Referer header.
 
 (Test to ensure that Origin is consistent with Referer.)
 
-## PUT /learners/:user/worksheets/:worksheet/progress
+## PUT /learners/:user/state
+## GET /learners/:user/state
 
-record progress on this worksheet
-
-## PUT /learners/:user/worksheets/:worksheet/state
-
-Record the page state for the given worksheet.
+Fetch or record the page state for the given worksheet.
 
 ## POST /learners/:user/worksheets/:worksheet/statements
 
