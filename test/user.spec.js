@@ -9,11 +9,6 @@ chai.use(chaiHttp);
 
 const expect = chai.expect;
 
-import * as helper from './mongoose-helper';
-
-before(helper.before);
-after(helper.after);
-
 describe("GET /users/fake@fake.com/token", function() {
   before(() => {
     let user = new userModel({ name: 'Fake Person', email:'fake@fake.com', password: '1234' });

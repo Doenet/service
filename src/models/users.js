@@ -56,6 +56,24 @@ UserSchema.methods.canEdit = function(anotherUser) {
   return false;
 };
 
+function yes() { return true; }
+UserSchema.methods.canCreateCourses = yes;
+UserSchema.methods.canViewCourse = yes;
+
+UserSchema.methods.canUpdateCourse = function(course) {
+  return course.instructors.indexOf( this.id ) >= 0;
+};
+
 UserSchema.methods.canPutProgress = UserSchema.methods.canEdit;
+
+UserSchema.methods.canPostStatement = UserSchema.methods.canEdit;
+
+UserSchema.set('toJSON', {
+     transform: function (doc, ret, options) {
+         ret.id = ret._id;
+         delete ret._id;
+         delete ret.__v;
+     }
+});
 
 export default model('User', UserSchema);

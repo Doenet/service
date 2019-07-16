@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 import * as userController from './controllers/users';
 import * as learnerController from './controllers/learners';
+import * as courseController from './controllers/courses';
 import identity from './middleware/identity';
 
 // ## GET /users/:user/authentication
@@ -37,6 +38,10 @@ router.get('/learners/:user/progress', userController.findUser, learnerControlle
 // ## POST /learners/:user/worksheets/:worksheet/statements
 // ## POST /learners/:user/worksheets/:worksheet/progress
 
+// ## POST /learners/:user/statements
+
+router.post('/learners/:user/statements', userController.findUser, learnerController.postStatement);
+
 // Record a learner event (like an xAPI statement or progress).
 // If no cookie is set, a set-cookie is sent for a guest user.
 
@@ -46,34 +51,15 @@ router.get('/learners/:user/progress', userController.findUser, learnerControlle
 router.put('/learners/:user/state', userController.findUser, learnerController.putState);
 router.get('/learners/:user/state', userController.findUser, learnerController.getState);
 
-// ## POST /courses/:course/learners/:user
-// enroll a student in a course
-
-// ## POST /courses/:course/instructors/:user
-// add an instructor in a course
-
-// ## DELETE /courses/:course/learners/:user
-// disenroll a student from the course
-
-// ## GET /courses/:course/learners
-// get a list of learners enrolled in a course
-
-// ## GET /courses/:course/instructors
-// get a list of instructors in a course
-
-// ## GET /courses/:course/progress
-// get a list of scores for all the learners and worksheets
-
 // ## POST /courses
-// ## DELETE /courses/:course
-// create or delete a course; the current user becomes an "instructor"
+router.post('/courses', courseController.createCourse);
 
-// ## GET /courses/:course/worksheets
-// view all the assignments for the course
+// PUT /courses/:course
+// PATCH /courses/:course
+router.put('/courses/:course', courseController.findCourse, courseController.updateCourse);
+router.patch('/courses/:course', courseController.findCourse, courseController.updateCourse);
 
-// ## GET /courses/:course/worksheets/:worksheet
-// ## PUT /courses/:course/worksheets/:worksheet
-// ## POST /courses/:course/worksheets/:worksheet
-// ## DELETE /courses/:course/worksheets/:worksheet
+// GET /courses/:course
+router.get('/courses/:course', courseController.findCourse, courseController.getCourse);
 
 export default router;

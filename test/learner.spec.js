@@ -10,11 +10,6 @@ chai.use(chaiHttp);
 
 const expect = chai.expect;
 
-import * as helper from './mongoose-helper';
-
-before(helper.before);
-after(helper.after);
-
 describe("PUT /learners/:learner/progress", function() {
   var user;
   
@@ -104,7 +99,6 @@ describe("PUT /learners/:learner/progress", function() {
   });  
 
 });
-
 
 describe("PUT /learners/:learner/state", function() {
   var user;
@@ -198,5 +192,39 @@ describe("PUT /learners/:learner/state", function() {
   after( () => {
     return anotherAgent.close();
   });  
+
+});
+
+describe("POST /learners/:learner/statements", function() {
+  var user;
+  
+  let agent = chai.request.agent(app);
+  
+  before(() => {
+    user = new userModel({ name: 'xAPI Learner', email:'xapi@learner.com', password: 'xapixapi' });
+    return user.save();
+  });
+  
+  before(() => {
+    return agent
+      .get("/users/xapi@learner.com/token")
+      .auth('xapi@learner.com', 'xapixapi');
+  });
+
+  var statement = { verb: "HELLO", object: "blah" };
+  
+  it("accepts statements", function() {
+    return agent
+      .post("/learners/me/statements")
+      .send(statement)
+      .then(function (res) {
+        expect(res.body.verb).to.eql(statement.verb);
+        expect(res.body.object).to.eql(statement.object);
+      });
+  });
+  
+  after( () => {
+    return agent.close();
+  });
 
 });
