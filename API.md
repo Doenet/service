@@ -48,6 +48,7 @@ worksheet (meaning it is deduced from the Referer).
 ### GET /courses/:course
 
 create or delete a course; the current user becomes an "instructor"
+when creating a course.
 
 ### GET /courses/:course/instructors
 
@@ -61,6 +62,7 @@ other instructors
 ### DELETE /courses/:course/instructors/:user
 
 remove an instructor from a course
+
 
 ### GET /courses/:course/learners
 

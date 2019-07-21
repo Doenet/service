@@ -62,4 +62,22 @@ router.patch('/courses/:course', courseController.findCourse, courseController.u
 // GET /courses/:course
 router.get('/courses/:course', courseController.findCourse, courseController.getCourse);
 
+// POST /courses/:course/instructors/:user
+router.post('/courses/:course/instructors/:user',
+            userController.findUser, courseController.findCourse,
+            courseController.addInstructor);
+
+router.delete('/courses/:course/instructors/:user',
+              userController.findUser, courseController.findCourse,
+              courseController.removeInstructor);
+
+// POST /courses/:course/learners/:user
+router.post('/courses/:course/learners/:user',
+            userController.findUser, courseController.findCourse,
+            courseController.addLearner);
+
+router.delete('/courses/:course/learners/:user',
+              userController.findUser, courseController.findCourse,
+              courseController.removeLearner);
+
 export default router;

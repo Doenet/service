@@ -32,9 +32,13 @@ export function createCourse(req, res, next) {
       
       courseModel.create( params, function(err, course) {
         if (err)
-          return res.status(500).send('Error creating course');
-        else
-          return res.json(course.toJSON());
+          res.status(500).send('Error creating course');
+        else {
+          req.jwt.user.instructorFor.push( course._id );
+          req.jwt.user.save( function() {
+            return res.json(course.toJSON());
+          });
+        }
       });
     } else {
       res.status(403).send('Not permitted to create courses');
@@ -49,14 +53,15 @@ export function createCourse(req, res, next) {
 export function updateCourse(req, res, next) {
   if (req.jwt && req.jwt.user) {
     if (req.jwt.user.canUpdateCourse( req.course )) {
+      
       if (req.body.name && typeof req.body.name === 'string')
         req.course.name = req.body.name;
       
       req.course.save( function(err) {
         if (err)
-          return res.status(500).send('Error updating course');
+          res.status(500).send('Error updating course');
         else
-          return res.json(req.course.toJSON());
+          res.json(req.course.toJSON());
       });
     } else {
       res.status(403).send('Not permitted to update this course');
@@ -72,24 +77,108 @@ export function updateCourse(req, res, next) {
 export function getCourse(req, res, next) {
   if (req.jwt && req.jwt.user) {
     if (req.jwt.user.canViewCourse( req.course )) {
-      return res.json(req.course.toJSON());
+      res.json(req.course.toJSON());
     } else {
-      return res.status(403).send('Not permitted to view course');
+      res.status(403).send('Not permitted to view course');
     }
   } else {
-    return res.status(401).send('Unauthenticated');
+    res.status(401).send('Unauthenticated');
+  }
+}
+
+// POST /courses/:course/instructors/:user
+// add an instructor in a course; only an instructor is permitted to add
+// other instructors
+export function addInstructor(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canAddInstructor( req.course )) {
+      courseModel.findOneAndUpdate( { _id: req.course._id },
+                                    { '$addToSet': { 'instructors': req.user._id } },
+                                    { new: true },
+                                    function( err, course ) {
+        if (err)
+          res.status(500).send('Could not update course');
+        else {
+          res.json(course.toJSON());
+        }
+      });
+    } else {
+      res.status(403).send('Not permitted to add instructor to course');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
+  }
+}
+
+// POST /courses/:course/learners/:user
+export function addLearner(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canAddLearner( req.course, req.user )) {
+      courseModel.findOneAndUpdate( { _id: req.course._id },      
+                                    { '$addToSet': { 'learners': req.user._id } },
+                                    { new: true },
+                                    function( err, course ) {
+        if (err)
+          res.status(500).send('Could not update course');
+        else
+          res.json(course.toJSON());
+      });
+    } else {
+      res.status(403).send('Not permitted to add learner to course');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
   }
 }
 
 // GET /courses/:course/instructors
 // get a list of instructors in a course
 
-// POST /courses/:course/instructors/:user
-// add an instructor in a course; only an instructor is permitted to add
-// other instructors
-
 // DELETE /courses/:course/instructors/:user
-// remove an instructor from a course
+// remove an instructor from a course; only an instructor can remove an instructor
+export function removeInstructor(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canRemoveInstructor( req.course, req.user )) {
+      courseModel.findOneAndUpdate( { _id: req.course._id },
+                                    { '$pull': { 'instructors': req.user._id } },
+                                    { new: true },
+                                    function( err, course ) {
+        if (err)
+          res.status(500).send('Could not update course');
+        else {
+          res.json(course.toJSON());
+        }
+      });
+    } else {
+      res.status(403).send('Not permitted to remove instructor from course');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
+  }
+}
+
+// DELETE /courses/:course/learners/:user
+// disenroll a student from the course; only an instructor or a student themselves can remove themselves
+export function removeLearner(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canRemoveLearner( req.course, req.user )) {
+      courseModel.findOneAndUpdate( { _id: req.course._id },
+                                    { '$pull': { 'learners': req.user._id } },
+                                    { new: true },
+                                    function( err, course ) {
+        if (err)
+          res.status(500).send('Could not update course');
+        else {
+          res.json(course.toJSON());
+        }
+      });
+    } else {
+      res.status(403).send('Not permitted to remove learner from course');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
+  }
+}
 
 // GET /courses/:course/learners
 // get a list of learners enrolled in a course
@@ -100,13 +189,10 @@ export function getCourse(req, res, next) {
 // GET /instructors/:user/courses
 // Get a list of all courses an instructor is teaching
 
-// DELETE /courses/:course/learners/:user
-// disenroll a student from the course
+
 
 // POST /courses/:course/learners/:user
 // enroll a student in a course; students can enroll themselves in a course 
 
 // GET /courses/:course/progress
 // get a list of scores for all the learners and worksheets
-
-

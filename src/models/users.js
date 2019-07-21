@@ -19,6 +19,16 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
+
+  instructorFor: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Course'
+  }],
+
+  learnerIn: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Course'
+  }],
   
   password: {
     type: String,
@@ -60,9 +70,44 @@ function yes() { return true; }
 UserSchema.methods.canCreateCourses = yes;
 UserSchema.methods.canViewCourse = yes;
 
-UserSchema.methods.canUpdateCourse = function(course) {
+UserSchema.methods.isInstructorFor = function(course) {
   return course.instructors.indexOf( this.id ) >= 0;
 };
+
+UserSchema.methods.canUpdateCourse = UserSchema.methods.isInstructorFor;
+UserSchema.methods.canAddInstructor = UserSchema.methods.isInstructorFor;
+
+// people can add themselves to courses, but no one else
+UserSchema.methods.canAddLearner = function(course, learner) {
+  if (this._id.equals(learner._id))
+    return true;
+
+  return false;
+};
+
+UserSchema.methods.canRemoveInstructor = function(course, instructor) {
+  // Only instructors can remove instructors
+  if (this.isInstructorFor(course)) {
+    // Do not permit an instructor to remove the last instructor
+    if (course.instructors.length == 1)
+      return false;
+
+    return true;
+  }
+
+  return false;
+};
+
+UserSchema.methods.canRemoveLearner = function(course, learner) {
+  if (this._id.equals(learner._id))
+    return true;
+
+  if (this.isInstructorFor(course))
+    return true;
+
+  return false;
+};
+
 
 UserSchema.methods.canPutProgress = UserSchema.methods.canEdit;
 

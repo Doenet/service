@@ -43,19 +43,19 @@ describe("POST /courses", function() {
       .then(function (res) {
         expect(res.body.name).to.eql("The Title");
         expect(res.body.instructors).to.include(user.id);
-        console.log(res.body);
       });
   });
-  
+
   after( () => {
     return agent.close();
   });
 });
 
-
 describe("PUT /courses/:course", function() {
   var user;
   var course;
+  var learner;
+  var otherUser;
   
   before(() => {
     user = new userModel({ name: 'Another Instructor',
@@ -64,14 +64,20 @@ describe("PUT /courses/:course", function() {
   });
 
   before(() => {
-    let otherUser = new userModel({ name: 'Random User',
-                                    email:'random@name.com', password: 'random123' });
+    otherUser = new userModel({ name: 'Random User',
+                                email:'random@name.com', password: 'random123' });
     return otherUser.save();
   });
 
   before(() => {
+    learner = new userModel({ name: 'Random Learner',
+                                    email:'learner17@name.com', password: 'random123' });
+    return learner.save();
+  });
+  
+  before(() => {
     course = new courseModel({ name: 'This Old Course',
-                               instructors: [ user._id] });
+                               instructors: [user._id] });
     return course.save();
   });
   
@@ -89,6 +95,14 @@ describe("PUT /courses/:course", function() {
     return anotherAgent
       .get("/users/random@name.com/token")
       .auth('random@name.com', 'random123');
+  });
+
+  let learnerAgent = chai.request.agent(app);
+
+  before(() => {
+    return learnerAgent
+      .get("/users/learner17@name.com/token")
+      .auth('learner17@name.com', 'random123');
   });
   
   it("updates courses", function() {
@@ -130,12 +144,149 @@ describe("PUT /courses/:course", function() {
       });
   });
 
+  it("does not random people become instructors", function() {
+    return anotherAgent
+      .post("/courses/" + course.id + "/instructors/me")
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });
+
+  it("does not duplicate instructors", function() {
+    return agent
+      .post("/courses/" + course.id + "/instructors/me")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.instructors).to.have.length(1);
+        expect(res.body.instructors).to.be.an('array').that.includes(user.id);
+      });
+  });  
+
+  it("does not let non-instructors add more instructors", function() {
+    return anotherAgent
+      .post("/courses/" + course.id + "/instructors/" + otherUser.id)
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });
+  
+  it("lets instructors add more instructors", function() {
+    return agent
+      .post("/courses/" + course.id + "/instructors/" + otherUser.id)
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.instructors).to.have.length(2);
+        expect(res.body.instructors).to.be.an('array').that.includes(user.id);
+        expect(res.body.instructors).to.be.an('array').that.includes(otherUser.id);
+      });
+  });
+
+  it("does not let people add other people as learners", function() {
+    return agent
+      .post("/courses/" + course.id + "/learners/" + learner.id)
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });
+
+  it("lets people add themselves as learners", function() {
+    return learnerAgent
+      .post("/courses/" + course.id + "/learners/" + learner.id)
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.learners).to.be.an('array').that.has.length(1);
+        expect(res.body.learners).to.be.an('array').that.includes(learner.id);
+      });
+  });
+
+  it("lets people remove themselves as learners", function() {
+    return learnerAgent
+      .delete("/courses/" + course.id + "/learners/" + learner.id)
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.learners).to.be.an('array').that.has.length(0);
+        expect(res.body.learners).to.be.an('array').that.does.not.include(learner.id);
+      });
+  });
+
+  it("lets people return as learners", function() {
+    return learnerAgent
+      .post("/courses/" + course.id + "/learners/" + learner.id)
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.learners).to.be.an('array').that.has.length(1);
+        expect(res.body.learners).to.be.an('array').that.includes(learner.id);
+      });
+  });
+  
+  it("lets instructors also be learners", function() {
+    return agent
+      .post("/courses/" + course.id + "/learners/me")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.learners).to.be.an('array').that.includes(user.id);
+      });
+  });
+
+  it("instructors remove themselves", function() {
+    return agent
+      .delete("/courses/" + course.id + "/instructors/me")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.instructors).to.be.an('array').that.does.not.include(user.id);
+        expect(res.body.instructors).to.be.an('array').that.includes(otherUser.id);
+        expect(res.body.instructors).to.have.length(1);
+      });
+  });
+
+  it("non-instructors can't become non-isntructors", function() {
+    return learnerAgent
+      .delete("/courses/" + course.id + "/instructors/me")
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });
+
+  it("instructors can not remove the only instructor", function() {
+    return anotherAgent
+      .delete("/courses/" + course.id + "/instructors/me")
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });
+
+  it("lets instructors add previously removed instructors", function() {
+    return anotherAgent
+      .post("/courses/" + course.id + "/instructors/" + user.id)
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.instructors).to.have.length(2);
+        expect(res.body.instructors).to.be.an('array').that.includes(user.id);
+        expect(res.body.instructors).to.be.an('array').that.includes(otherUser.id);
+      });
+  });
+  
+  it("lets instructors remove other instructors", function() {
+    return agent
+      .delete("/courses/" + course.id + "/instructors/" + otherUser.id)
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body.instructors).to.be.an('array').that.does.not.include(otherUser.id);
+        expect(res.body.instructors).to.be.an('array').that.includes(user.id);
+        expect(res.body.instructors).to.have.length(1);
+      });
+  });
+  
   after( () => {
     return agent.close();
   });
 
   after( () => {
     return anotherAgent.close();
+  });
+
+  after( () => {
+    return learnerAgent.close();
   });
 
 });

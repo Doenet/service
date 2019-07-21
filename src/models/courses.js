@@ -20,11 +20,11 @@ const CourseSchema = new Schema({
 }, { timestamps: true });
 
 CourseSchema.set('toJSON', {
-     transform: function (doc, ret, options) {
-         ret.id = ret._id;
-         delete ret._id;
-         delete ret.__v;
-     }
+  transform: function (doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  }
 });
 
 export default model('Course', CourseSchema);

@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import userModel from '../models/users';
 
 export function findUser( req, res, next ) {
-  function handleUser (err, user ) {
+  function handleUser ( err, user ) {
     if (err) {
       next(err);
     } else {
