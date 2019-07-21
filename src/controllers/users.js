@@ -41,8 +41,7 @@ export function get(req, res, next) {
   if (req.user) {
     if (req.jwt && req.jwt.user) {
       if (req.jwt.user.canView( req.user )) {
-        delete req.user.password;
-        res.json(req.user);
+        res.json(req.user.toJSON());
       } else {
         res.status(403).send('Not permitted to view');
       }
@@ -58,8 +57,13 @@ export function put(req, res, next) {
   if (req.user) {
     if (req.jwt && req.jwt.user) {
       if (req.jwt.user.canEdit( req.user )) {
-        if (req.body.name) {
-          req.user.name = req.body.name;
+        
+        if (req.body.firstName) {
+          req.user.firstName = req.body.firstName;
+        }
+
+        if (req.body.lastName) {
+          req.user.lastName = req.body.lastName;
         }
 
         req.user.save()
@@ -93,7 +97,7 @@ export function token(req, res, next) {
         const token = jwt.sign({id: req.user._id}, req.app.get('secretKey'), { expiresIn: '1h' });
         delete req.user.password;
         res.cookie('token', token);
-        res.json(req.user);
+        res.json({ token: token });
       } else {
         res.status(401).send("Invalid credentials");
       }

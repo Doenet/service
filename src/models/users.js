@@ -5,16 +5,17 @@ const saltRounds = 10;
 
 const UserSchema = new Schema({
   // this name is purely for decorative purposes, e.g., in a gradebook
-  name: { type: String, trim: true },
+  firstName: { type: String, trim: true },
+  lastName: { type: String, trim: true },
 
-  // the email is also a username
+  // the email is also the username
   email: {
     type: String,
     trim: true,
     required: true,
     unique: true    
   },
-
+  
   guest: {
     type: Boolean,
     default: false
@@ -115,9 +116,10 @@ UserSchema.methods.canPostStatement = UserSchema.methods.canEdit;
 
 UserSchema.set('toJSON', {
      transform: function (doc, ret, options) {
-         ret.id = ret._id;
-         delete ret._id;
-         delete ret.__v;
+       ret.id = ret._id;
+       delete ret._id;       
+       delete ret.__v;
+       delete ret.password;       
      }
 });
 

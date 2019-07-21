@@ -11,7 +11,7 @@ const expect = chai.expect;
 
 describe("GET /users/fake@fake.com/token", function() {
   before(() => {
-    let user = new userModel({ name: 'Fake Person', email:'fake@fake.com', password: '1234' });
+    let user = new userModel({ firstName: 'Fake Person', email:'fake@fake.com', password: '1234' });
     return user.save();
   });
 
@@ -23,7 +23,6 @@ describe("GET /users/fake@fake.com/token", function() {
       .then(function (res) {
         expect(res).to.have.status(200);
         expect(res).to.have.cookie('token');
-        expect(res.body.name).to.eql('Fake Person');
       });
   });
 
@@ -62,7 +61,7 @@ describe("GET /users/fake@fake.com/token", function() {
 
 describe("GET /users/fake2@fake.com", function() {
   before(() => {
-    let user = new userModel({ name: 'Faker Person',
+    let user = new userModel({ firstName: 'Faker Person',
                                email:'fake2@fake.com',
                                password: 'abcd' });
     return user.save();
@@ -81,7 +80,7 @@ describe("GET /users/fake2@fake.com", function() {
       .get("/users/fake2@fake.com")
       .then(function (res) {
         expect(res).to.have.status(200);
-        expect(res.body.name).to.eql('Faker Person');
+        expect(res.body.firstName).to.eql('Faker Person');
       });
   });
 
@@ -92,7 +91,7 @@ describe("GET /users/fake2@fake.com", function() {
 
 describe("GET /users/missing@person.com", function() {
   before(() => {
-    let user = new userModel({ name: 'Also Me', email:'me2@me.com', password: 'abcd' });
+    let user = new userModel({ firstName: 'Also Me', email:'me2@me.com', password: 'abcd' });
     return user.save();
   });
 
@@ -120,12 +119,12 @@ describe("GET /users/missing@person.com", function() {
   
 describe("GET /users/somebody@else.com", function() {
   before(() => {
-    let user = new userModel({ name: 'Me', email:'me@me.com', password: 'abcd' });
+    let user = new userModel({ firstName: 'Me', email:'me@me.com', password: 'abcd' });
     return user.save();
   });
 
   before(() => {
-    let user = new userModel({ name: 'Somebody Else', email:'somebody@else.com', password: 'abcd' });
+    let user = new userModel({ firstName: 'Somebody Else', email:'somebody@else.com', password: 'abcd' });
     return user.save();
   });  
   
@@ -163,7 +162,7 @@ describe("GET /users/somebody@else.com", function() {
 
 describe("PUT /users/name@change.com", function() {
   before(() => {
-    let user = new userModel({ name: 'Original Name', email:'name@change.com', password: 'abcde' });
+    let user = new userModel({ firstName: 'Original Name', email:'name@change.com', password: 'abcde' });
     return user.save();
   });
 
@@ -179,16 +178,16 @@ describe("PUT /users/name@change.com", function() {
     return agent
       .get("/users/name@change.com")
       .then(function (res) {
-        expect(res.body.name).to.eql('Original Name');
+        expect(res.body.firstName).to.eql('Original Name');
       });
   });
 
   it("name is changed to New Name", function() {
     return agent
       .put("/users/name@change.com")
-      .send({name:"New Name"})
+      .send({firstName:"New Name"})
       .then(function (res) {
-        expect(res.body.name).to.eql('New Name');
+        expect(res.body.firstName).to.eql('New Name');
       });
   });  
 
@@ -196,16 +195,16 @@ describe("PUT /users/name@change.com", function() {
     return agent
       .get("/users/name@change.com")
       .then(function (res) {
-        expect(res.body.name).to.eql('New Name');
+        expect(res.body.firstName).to.eql('New Name');
       });
   });
 
   it("responds to PATCH as well", function() {
     return agent
       .patch("/users/name@change.com")
-      .send({name:"Newer Name"})
+      .send({firstName:"Newer Name"})
       .then(function (res) {
-        expect(res.body.name).to.eql('Newer Name');
+        expect(res.body.firstName).to.eql('Newer Name');
       });
   });    
   
