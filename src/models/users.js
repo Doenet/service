@@ -20,7 +20,7 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
-
+  /*
   instructorFor: [{
     type: Schema.Types.ObjectId,
     ref: 'Course'
@@ -30,6 +30,7 @@ const UserSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Course'
   }],
+  */
   
   password: {
     type: String,
@@ -61,6 +62,8 @@ UserSchema.methods.canView = function(anotherUser) {
   return false;
 };
 
+UserSchema.methods.canViewLearnerCourseList = UserSchema.methods.canView;
+  
 UserSchema.methods.canEdit = function(anotherUser) {
   if (this._id.equals(anotherUser._id)) return true;  
 
@@ -70,6 +73,8 @@ UserSchema.methods.canEdit = function(anotherUser) {
 function yes() { return true; }
 UserSchema.methods.canCreateCourses = yes;
 UserSchema.methods.canViewCourse = yes;
+UserSchema.methods.canViewInstructorList = yes;
+UserSchema.methods.canViewInstructorCourseList = yes;
 
 UserSchema.methods.isInstructorFor = function(course) {
   return course.instructors.indexOf( this.id ) >= 0;
@@ -77,6 +82,7 @@ UserSchema.methods.isInstructorFor = function(course) {
 
 UserSchema.methods.canUpdateCourse = UserSchema.methods.isInstructorFor;
 UserSchema.methods.canAddInstructor = UserSchema.methods.isInstructorFor;
+UserSchema.methods.canViewLearnerList = UserSchema.methods.isInstructorFor;
 
 // people can add themselves to courses, but no one else
 UserSchema.methods.canAddLearner = function(course, learner) {

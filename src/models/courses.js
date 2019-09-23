@@ -27,4 +27,8 @@ CourseSchema.set('toJSON', {
   }
 });
 
+// because we search for all instructors or learners in a course
+CourseSchema.index({"instructors": 1});
+CourseSchema.index({"learners": 1});
+
 export default model('Course', CourseSchema);

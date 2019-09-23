@@ -7,7 +7,7 @@ const opts = {useFindAndModify: false, useCreateIndex: true, useNewUrlParser: tr
 let mongoServer;
 
 export function before(done) {
-  mongoServer = new MongoMemoryServer();
+  mongoServer = new MongoMemoryServer( { debug: true } );
   mongoServer
     .getConnectionString()
     .then((mongoUri) => {

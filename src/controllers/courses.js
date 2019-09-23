@@ -34,10 +34,7 @@ export function createCourse(req, res, next) {
         if (err)
           res.status(500).send('Error creating course');
         else {
-          req.jwt.user.instructorFor.push( course._id );
-          req.jwt.user.save( function() {
-            return res.json(course.toJSON());
-          });
+          return res.json(course.toJSON());
         }
       });
     } else {
@@ -111,6 +108,7 @@ export function addInstructor(req, res, next) {
 }
 
 // POST /courses/:course/learners/:user
+// enroll a student in a course; students can enroll themselves in a course 
 export function addLearner(req, res, next) {
   if (req.jwt && req.jwt.user) {
     if (req.jwt.user.canAddLearner( req.course, req.user )) {
@@ -133,6 +131,27 @@ export function addLearner(req, res, next) {
 
 // GET /courses/:course/instructors
 // get a list of instructors in a course
+export function getInstructors(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canViewInstructorList( req.course )) {
+      courseModel.findOne( { _id: req.course._id },
+                           function( err, course ) {
+                             if (err)
+                               res.status(500).send('Error finding course');
+                             else {
+                               if (course)
+                                 res.json(course.instructors);
+                               else
+                                 res.status(500).send('Could not find course');
+                             }
+                           });
+    } else {
+      res.status(403).send('Not permitted to view learners in course');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
+  }
+}
 
 // DELETE /courses/:course/instructors/:user
 // remove an instructor from a course; only an instructor can remove an instructor
@@ -181,18 +200,79 @@ export function removeLearner(req, res, next) {
 }
 
 // GET /courses/:course/learners
-// get a list of learners enrolled in a course
+// get a list of the learners enrolled in a course
+export function getLearners(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canViewLearnerList( req.course )) {
+      courseModel.findOne( { _id: req.course._id },
+                           function( err, course ) {
+                             if (err)
+                               res.status(500).send('Error finding course');
+                             else {
+                               if (course)
+                                 res.json(course.learners);
+                               else
+                                 res.status(500).send('Could not find course');
+                             }
+                           });
+    } else {
+      res.status(403).send('Not permitted to view learners in course');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
+  }
+}
 
 // GET /learners/:user/courses
 // Get a list of all courses a learner is enrolled in
+export function getLearnerCourses(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canViewLearnerCourseList( req.user )) {
+      courseModel.find( { learners: req.user._id }, { },
+                         function( err, courses ) {
+                           if (err)
+                             res.status(500).send('Error finding courses');
+                           else {
+                             if (courses)
+                               res.json( courses.map( function(x) { return x._id; } ) );
+                             else
+                               res.status(500).send('Could not find courses');
+                           }
+                         });
+    } else {
+      res.status(403).send('Not permitted to view the courses for this user');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
+  }
+}
 
 // GET /instructors/:user/courses
 // Get a list of all courses an instructor is teaching
+export function getInstructorCourses(req, res, next) {
+  if (req.jwt && req.jwt.user) {
+    if (req.jwt.user.canViewInstructorCourseList( req.user )) {
+      courseModel.find( { instructors: req.user._id }, { },
+                         function( err, courses ) {
+                           if (err)
+                             res.status(500).send('Error finding courses');
+                           else {
+                             if (courses)
+                               res.json( courses.map( function(x) { return x._id; } ) );
+                             else
+                               res.status(500).send('Could not find courses');
+                           }
+                         });
+    } else {
+      res.status(403).send('Not permitted to view the courses for this user');
+    }
+  } else {
+    res.status(401).send('Unauthenticated');
+  }
+}
 
 
 
-// POST /courses/:course/learners/:user
-// enroll a student in a course; students can enroll themselves in a course 
 
 // GET /courses/:course/progress
 // get a list of scores for all the learners and worksheets

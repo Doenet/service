@@ -199,6 +199,110 @@ describe("PUT /courses/:course", function() {
       });
   });
 
+  it("lets instructor see the list of learners", function() {
+    return agent
+      .get("/courses/" + course.id + "/learners")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an('array').that.has.length(1);
+        expect(res.body).to.be.an('array').that.includes(learner.id);
+      });
+  });  
+
+  it("doesn't let non-instructor see the list of learners", function() {
+    return learnerAgent
+      .get("/courses/" + course.id + "/learners")
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });  
+
+  it("doesn't let guests see the list of learners", function() {
+    return chai
+      .request(app)
+      .get("/courses/" + course.id + "/learners")
+      .then(function (res) {
+        expect(res).to.have.status(401);
+      });
+  });  
+
+  it("doesn't let guests see the list of instructors", function() {
+    return chai
+      .request(app)
+      .get("/courses/" + course.id + "/learners")
+      .then(function (res) {
+        expect(res).to.have.status(401);
+      });
+  });
+
+  it("lets the instructor see the list of instructors", function() {
+    return agent
+      .get("/courses/" + course.id + "/instructors")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.length(2);
+        expect(res.body).to.be.an('array').that.includes(user.id);
+        expect(res.body).to.be.an('array').that.includes(otherUser.id);        
+      });
+  });    
+
+  it("lets a learner see their list of coures", function() {
+    return learnerAgent
+      .get("/learners/" + learner.id + "/courses")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.length(1);
+        expect(res.body).to.be.an('array').that.includes(course.id);
+      });
+  });    
+
+  it("doesn't let an instructor see someone else's list of coures", function() {
+    return agent
+      .get("/learners/" + learner.id + "/courses")
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });      
+
+  it("doesn't let an instructor see someone else's list of coures", function() {
+    return agent
+      .get("/learners/" + learner.id + "/courses")
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });      
+  
+  it("lets an instructor see what they are teaching", function() {
+    return agent
+      .get("/instructors/" + user.id + "/courses")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.length(1);
+        expect(res.body).to.be.an('array').that.includes(course.id);
+      });
+  });    
+
+  it("lets other people see what an instructor is teaching", function() {
+    return learnerAgent
+      .get("/instructors/" + user.id + "/courses")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.length(1);
+        expect(res.body).to.be.an('array').that.includes(course.id);
+      });
+  });    
+  
+  it("lets a learner see the list of instructors", function() {
+    return learnerAgent
+      .get("/courses/" + course.id + "/instructors")
+      .then(function (res) {
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.length(2);
+        expect(res.body).to.be.an('array').that.includes(user.id);
+        expect(res.body).to.be.an('array').that.includes(otherUser.id);        
+      });
+  });     
+  
   it("lets people remove themselves as learners", function() {
     return learnerAgent
       .delete("/courses/" + course.id + "/learners/" + learner.id)
@@ -239,7 +343,7 @@ describe("PUT /courses/:course", function() {
       });
   });
 
-  it("non-instructors can't become non-isntructors", function() {
+  it("non-instructors can't become non-instructors", function() {
     return learnerAgent
       .delete("/courses/" + course.id + "/instructors/me")
       .then(function (res) {

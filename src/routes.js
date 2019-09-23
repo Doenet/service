@@ -62,6 +62,16 @@ router.patch('/courses/:course', courseController.findCourse, courseController.u
 // GET /courses/:course
 router.get('/courses/:course', courseController.findCourse, courseController.getCourse);
 
+// GET /courses/:course/learners
+router.get('/courses/:course/learners',
+           courseController.findCourse,
+           courseController.getLearners);
+
+// GET /courses/:course/learners
+router.get('/courses/:course/instructors',
+           courseController.findCourse,
+           courseController.getInstructors);
+
 // POST /courses/:course/instructors/:user
 router.post('/courses/:course/instructors/:user',
             userController.findUser, courseController.findCourse,
@@ -79,5 +89,13 @@ router.post('/courses/:course/learners/:user',
 router.delete('/courses/:course/learners/:user',
               userController.findUser, courseController.findCourse,
               courseController.removeLearner);
+
+router.get('/learners/:user/courses',
+            userController.findUser,
+            courseController.getLearnerCourses);
+
+router.get('/instructors/:user/courses',
+            userController.findUser,
+            courseController.getInstructorCourses);
 
 export default router;
