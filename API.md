@@ -63,7 +63,6 @@ other instructors
 
 remove an instructor from a course
 
-
 ### GET /courses/:course/learners
 
 get a list of learners enrolled in a course
@@ -99,18 +98,18 @@ the body, use GET.  It not available, perform a PUT or POST, the
 server should respond with 204 and the Location header with the URL of
 the newly created resource.
 
-### GET /courses/:course/worksheets
+### GET /courses/:course/assignments
 
 view all the assignments for the course
 
-### GET /courses/:course/worksheets/:worksheet
-### PUT /courses/:course/worksheets/:worksheet
-### POST /courses/:course/worksheets/:worksheet
-### DELETE /courses/:course/worksheets/:worksheet
+### GET /courses/:course/assignments/:assignment
+### PUT /courses/:course/assignments/:assignment
+### POST /courses/:course/assignments/:assignment
+### DELETE /courses/:course/assignments/:assignment
 
 add or update or delete a worksheet to a course
 
-worksheets have deadlines (and exceptions)
+assignments have deadlines (and exceptions)
 
 # What is a worksheet?
 

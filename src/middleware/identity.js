@@ -21,7 +21,6 @@ function getToken(req) {
 
 function validateUser(req, res, next) {
   var token = getToken(req);
-
   if (token) {
     jwt.verify(token, req.app.get('secretKey'), function(err, decoded) {
       if (err) {

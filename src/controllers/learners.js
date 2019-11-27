@@ -5,9 +5,12 @@ import statementModel from '../models/statements';
 
 function getWorksheet( req ) {
   // FIXME: this should be more robust, using Referer AND Origin and
-  // probably a param too.
-  var worksheet = req.get('Referer');
+  // probably another special header (X-Doenet: url) too.
 
+  var worksheet = req.get('X-Doenet-Referer');
+
+  console.log("worksheet=",worksheet);
+  
   if (worksheet)
     return worksheet;
 
@@ -28,7 +31,7 @@ function getThing(model, name, req, res, next) {
             if (name == 'state')
               return res.json(thing.state);
             else
-              return res.json(thing);
+              return res.json(thing.toJSON());
           }
         });
 
@@ -57,8 +60,8 @@ export function putThing(model, name, req, res, next) {
           setter = { state: req.body };
 
         if (name == 'progress')
-          setter = { score: req.body.score };          
-
+          setter = { score: req.body.score };
+        
         model.findOneAndUpdate(query, { $set: setter }, { upsert: true }, function(err, progress) {
           if (err)
             return res.status(500).send('Error saving ' + name);
@@ -66,7 +69,7 @@ export function putThing(model, name, req, res, next) {
             if (name == 'state')
               return res.json(setter.state);
             else
-              return res.json(setter);
+              return res.json(progress.toJSON());
           }
         });
       } else {

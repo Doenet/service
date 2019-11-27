@@ -8,6 +8,12 @@ const ProgressSchema = new Schema({
     index: true,
   },
 
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  
   worksheet: {
     type: String,
     required: true,
@@ -22,5 +28,13 @@ const ProgressSchema = new Schema({
 }, { timestamps: true });
 
 ProgressSchema.index( { "user": 1, "worksheet": 1 }, { unique: true } );
+
+ProgressSchema.set('toJSON', {
+     transform: function (doc, ret, options) {
+       delete ret._id;       
+       delete ret.__v;
+     }
+});
+
 
 export default model('Progress', ProgressSchema);

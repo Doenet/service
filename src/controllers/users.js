@@ -39,7 +39,7 @@ export function findUser( req, res, next ) {
 
 export function get(req, res, next) {
   if (req.user) {
-    if (req.jwt && req.jwt.user) {
+    if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
       if (req.jwt.user.canView( req.user )) {
         res.json(req.user.toJSON());
       } else {
@@ -55,9 +55,8 @@ export function get(req, res, next) {
   
 export function put(req, res, next) {
   if (req.user) {
-    if (req.jwt && req.jwt.user) {
+    if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
       if (req.jwt.user.canEdit( req.user )) {
-        
         if (req.body.firstName) {
           req.user.firstName = req.body.firstName;
         }
@@ -66,6 +65,22 @@ export function put(req, res, next) {
           req.user.lastName = req.body.lastName;
         }
 
+        if (req.body.jpegPhotograph) {
+          req.user.jpegPhotograph = req.body.jpegPhotograph;
+        }        
+        
+        if ('isInstructor' in req.body) {
+          req.user.isInstructor = req.body.isInstructor;
+        }        
+
+        if ('gpdrConsent' in req.body) {
+          if (req.body.gpdrConsent && !(req.user.gpdrConsent)) {
+            req.user.gpdrConsentDate = Date.now();
+          }
+          
+          req.user.gpdrConsent = req.body.gpdrConsent;
+        }                
+        
         req.user.save()
           .then(function() {
             delete req.user.password;
@@ -94,7 +109,7 @@ export function token(req, res, next) {
   } else {
     if (req.user && req.user.password) {
       if (bcrypt.compareSync(password, req.user.password)) {
-        const token = jwt.sign({id: req.user._id}, req.app.get('secretKey'), { expiresIn: '1h' });
+        const token = jwt.sign({id: req.user._id}, req.app.get('secretKey'), { expiresIn: '1d' });
         delete req.user.password;
         res.cookie('token', token);
         res.json({ token: token });

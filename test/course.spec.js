@@ -189,7 +189,24 @@ describe("PUT /courses/:course", function() {
       });
   });
 
-  it("lets people add themselves as learners", function() {
+  it("does not let people add themselves as learners to courses by default", function() {
+    return learnerAgent
+      .post("/courses/" + course.id + "/learners/" + learner.id)
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });
+
+  it("lets instructors make courses open", function() {
+    return agent
+      .put("/courses/" + course.id)
+      .send({enrollable:true})
+      .then(function (res) {
+        expect(res).to.have.status(200);
+      });
+  });
+
+  it("lets people add themselves as learners if the course is open", function() {
     return learnerAgent
       .post("/courses/" + course.id + "/learners/" + learner.id)
       .then(function (res) {
@@ -199,6 +216,24 @@ describe("PUT /courses/:course", function() {
       });
   });
 
+  it("lets instructors make courses closed", function() {
+    return agent
+      .put("/courses/" + course.id)
+      .send({enrollable:false})
+      .then(function (res) {
+        expect(res).to.have.status(200);
+      });
+  });
+
+  it("does not let people add themselves as learners to courses which are closed", function() {
+    return learnerAgent
+      .post("/courses/" + course.id + "/learners/" + learner.id)
+      .then(function (res) {
+        expect(res).to.have.status(403);
+      });
+  });
+
+  
   it("lets instructor see the list of learners", function() {
     return agent
       .get("/courses/" + course.id + "/learners")

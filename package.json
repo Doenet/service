@@ -4,7 +4,7 @@
   "description": "Learner record store and page state store",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --require @babel/register test",
+    "test": "mocha --exit --require @babel/register test",
     "start": "npm run production",
     "server": "babel-node ./src/index",
     "server:production": "node ./dist/index",
@@ -34,6 +34,11 @@
     "@babel/register": "^7.4.4",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
+    "eslint": "^6.7.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-mocha": "^6.2.2",
     "mocha": "^6.1.4",
     "mongodb-memory-server": "^5.1.5"
   }

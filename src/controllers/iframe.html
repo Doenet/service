@@ -1,0 +1,23 @@
+<html><head><script>
+window.addEventListener("message", receiveMessage, false);
+
+function receiveMessage(event) {
+console.log("EVENT",event);
+
+if (event.data.action == 'recordProgress') {
+var xhr = new XMLHttpRequest();
+xhr.open('PUT', '/learners/me/progress');
+xhr.onload = function() {
+    if (xhr.status === 200) {
+        console.log('response:' + xhr.responseText);
+    }
+    else {
+        console.log('Request failed.  Returned status of ' + xhr.status);
+    }
+};
+
+  xhr.send({score: event.data.score});
+}
+}
+</script>
+</head><body></body></html>

@@ -4,6 +4,11 @@ import * as userController from './controllers/users';
 import * as learnerController from './controllers/learners';
 import * as courseController from './controllers/courses';
 import identity from './middleware/identity';
+import createGuest from './middleware/guest';
+import * as iframe from './controllers/iframe';
+
+router.get('/iframe.html', iframe.html );
+router.get('/iframe.js', iframe.js );
 
 // ## GET /users/:user/authentication
 //
@@ -13,6 +18,7 @@ import identity from './middleware/identity';
 router.get('/users/:user/token', userController.findUser, userController.token);
 
 router.use( identity );
+router.use( createGuest );
 
 // ## GET /users/:user
 // 

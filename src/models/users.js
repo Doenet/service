@@ -8,18 +8,39 @@ const UserSchema = new Schema({
   firstName: { type: String, trim: true },
   lastName: { type: String, trim: true },
 
-  // the email is also the username
+  // a base64-encoded jpeg image
+  jpegPhotograph: {
+    type: String,
+    maxlength: 65536,
+  },
+  
+  // the email is also the username, but not required because guests don't have an email
   email: {
     type: String,
     trim: true,
-    required: true,
-    unique: true    
+    // required: true,
+    // unique: true    
   },
   
   guest: {
     type: Boolean,
     default: false
   },
+
+  isInstructor: {
+    type: Boolean,
+    default: false
+  },
+
+  gpdrConsent: {
+    type: Boolean,
+    default: false,    
+  },
+
+  gpdrConsentDate: {
+    type: Date
+  },
+  
   /*
   instructorFor: [{
     type: Schema.Types.ObjectId,
@@ -37,7 +58,7 @@ const UserSchema = new Schema({
     trim: true,
     // not `required: true` because guest users don't have passwords.
   },
-});
+}, { timestamps: true });
 
 // because we permit user look-ups based on email
 UserSchema.index({"email": 1});

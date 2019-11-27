@@ -22,13 +22,15 @@ export function findCourse(req, res, next) {
 
 // POST /courses
 export function createCourse(req, res, next) {
-  if (req.jwt && req.jwt.user) {
+  if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
     if (req.jwt.user.canCreateCourses()) {
       var params = {};
       params.instructors = [req.jwt.user._id];
-      
+
       if (req.body.name && typeof req.body.name === 'string')
         params.name = req.body.name;
+      else
+        params.name = 'course';
       
       courseModel.create( params, function(err, course) {
         if (err)
@@ -48,12 +50,18 @@ export function createCourse(req, res, next) {
 // PUT /courses/:course
 // PATCH /courses/:course
 export function updateCourse(req, res, next) {
-  if (req.jwt && req.jwt.user) {
+  if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
     if (req.jwt.user.canUpdateCourse( req.course )) {
-      
+
       if (req.body.name && typeof req.body.name === 'string')
         req.course.name = req.body.name;
-      
+
+      if ('enrollable' in req.body)
+        req.course.enrollable = req.body.enrollable;
+
+      if ('assignments' in req.body)
+        req.course.assignments = req.body.assignments;      
+
       req.course.save( function(err) {
         if (err)
           res.status(500).send('Error updating course');
@@ -202,7 +210,7 @@ export function removeLearner(req, res, next) {
 // GET /courses/:course/learners
 // get a list of the learners enrolled in a course
 export function getLearners(req, res, next) {
-  if (req.jwt && req.jwt.user) {
+  if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
     if (req.jwt.user.canViewLearnerList( req.course )) {
       courseModel.findOne( { _id: req.course._id },
                            function( err, course ) {

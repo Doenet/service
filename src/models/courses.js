@@ -1,5 +1,26 @@
 import { model, Schema } from 'mongoose';
 
+const AssignmentSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+
+  url: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true
+  },  
+
+  due: { type: Date },
+  
+  showAfter: { type: Date },
+
+  weight: { type: Number },
+});
+
 const CourseSchema = new Schema({
   learners: [{
     type: Schema.Types.ObjectId,
@@ -10,6 +31,14 @@ const CourseSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
+
+  assignments: [AssignmentSchema],
+
+  // whether or not the public can enroll in the course
+  enrollable: {
+    type: Boolean,
+    default: false
+  },
   
   name: {
     type: String,
@@ -22,6 +51,10 @@ const CourseSchema = new Schema({
 CourseSchema.set('toJSON', {
   transform: function (doc, ret, options) {
     ret.id = ret._id;
+    for( const assignment in ret.assignments ) {
+      assignment.id = assignment._id;
+      delete assignment._id;
+    }
     delete ret._id;
     delete ret.__v;
   }
