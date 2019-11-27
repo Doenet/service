@@ -6,38 +6,56 @@
 
 ### GET /users/:user
 
-get information about a user
+Get information about a user.
 
 ### PUT /users/:user
 ### PATCH /users/:user
 
 update a user
 
-### GET /users/:user/token ![Implemented](https://img.shields.io/badge/implemented-yes-green.svg)
+### GET /users/:user/token
 
 Log in as the given user.  Password is sent in the `Authorization:
 Basic` header.  Responds by setting a cookie containing a JWT.
 
 ## Learners, progress, page state, statements
 
-### PUT /learners/:user/progress
-### GET /learners/:user/progress
+### PUT /learners/:user/worksheets/:worksheet/progress
+### GET /learners/:user/worksheets/:worksheet/progress
 
-Retrieve or record progress on this worksheet, as defined by the Referer header.
+Retrieve or record progress on this worksheet.
 
-(Test to ensure that Origin is consistent with Referer.)
+### GET /learners/:user/worksheets/:worksheet/state/:uuid
 
-### PUT /learners/:user/state
-### GET /learners/:user/state
+Fetch page state for the given worksheet; this establishes a diffsync
+shadow, tied to the given uuid.
 
-Fetch or record the page state for the given worksheet.
+(The storage event fires when other tabs makes changes to
+localStorage. This is quite handy for communication purposes.)
 
-### POST /learners/:user/statements
+The server stores page state in mongo, but the shadows are stored in
+redis.
+
+### PATCH /learners/:user/worksheets/:worksheet/state/:uuid
+
+Submit a jsondiffpatch, and receive a jsondiffpatch to apply.  By
+repeatedly sending empty PATCHes, a client can poll the server for
+changes to page state.  (These also serve as heartbeats.)
+
+### POST /learners/:user/worksheets/:worksheet/statements
 
 Record a learner event (meaning an xAPI statement) for the given
-worksheet (meaning it is deduced from the Referer).
+worksheet.
 
-(If no cookie is set, a set-cookie is sent for a guest user.)
+### GET /learners/:user/worksheets/:worksheet/statements
+### GET /learners/:user/statements
+### GET /statements/:id
+
+Get a specific learner event.
+
+### GET /learners/:user/statements/recent
+
+Get (an unspecified number of) recent events for the given learner.
 
 ## Courses
 
@@ -47,56 +65,51 @@ worksheet (meaning it is deduced from the Referer).
 ### PATCH /courses/:course
 ### GET /courses/:course
 
-create or delete a course; the current user becomes an "instructor"
+Create or delete a course; the current user becomes an "instructor"
 when creating a course.
 
 ### GET /courses/:course/instructors
 
-get a list of instructors in a course
+Get a list of instructors in a course.
 
 ### POST /courses/:course/instructors/:user
 
-add an instructor in a course; only an instructor is permitted to add
-other instructors
+Add an instructor in a course; only an instructor is permitted to add
+other instructors.
 
 ### DELETE /courses/:course/instructors/:user
 
-remove an instructor from a course
+Remove an instructor from a course.
 
 ### GET /courses/:course/learners
 
-get a list of learners enrolled in a course
+Get a list of learners enrolled in a course.
 
 ### GET /learners/:user/courses
 
-Get a list of all courses a learner is enrolled in
+Get a list of all courses a learner is enrolled in.
 
 ### GET /instructors/:user/courses
 
-Get a list of all courses an instructor is teaching
+Get a list of all courses an instructor is teaching.
 
 ### DELETE /courses/:course/learners/:user
 
-disenroll a student from the course
+Disenroll a student from the course.
 
 ### POST /courses/:course/learners/:user
 
-enroll a student in a course; students can enroll themselves in a course 
+Enroll a student in a course; students can enroll themselves in a course.
 
 ### GET /courses/:course/progress
 
-get a list of scores for all the learners and worksheets
+Get a list of scores for all the learners and worksheets.
 
 ## Worksheets and the "gradebook"
 
 ### POST /worksheets
 
 Create a new worksheet
-
-Request: HEAD, examine response code: either 404 or 200. If you need
-the body, use GET.  It not available, perform a PUT or POST, the
-server should respond with 204 and the Location header with the URL of
-the newly created resource.
 
 ### GET /courses/:course/assignments
 
@@ -113,9 +126,10 @@ assignments have deadlines (and exceptions)
 
 # What is a worksheet?
 
-A worksheet id `window.location.href`
-
-The "Origin" header is also used to determine the true worksheet id.
+A "worksheet" is identified by the base64-encoded sha-256 hash of
+`window.location.href` encoded as a utf-8 string.  (Why use hashes?
+Eventually, a worksheet would be the hash of the content itself -- as
+loaded from say IPFS.)
 
 # What is a learner?
 
@@ -130,4 +144,4 @@ possible that there is no JWT cookie.  In this case, we manufacture a
 "guest" user (with no password...) and set the cookie.
 
 A guest user has no ability to log in (e.g., a guest has no password!)
-and depends on the JWT token as proof-of-identity.
+and depends entirely on the JWT token as proof-of-identity.

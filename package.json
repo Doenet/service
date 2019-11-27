@@ -4,7 +4,7 @@
   "description": "Learner record store and page state store",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --exit --require @babel/register test",
+    "test": "nyc mocha --exit --require @babel/register test",
     "start": "npm run production",
     "server": "babel-node ./src/index",
     "server:production": "node ./dist/index",
@@ -40,6 +40,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-mocha": "^6.2.2",
     "mocha": "^6.1.4",
-    "mongodb-memory-server": "^5.1.5"
+    "mongodb-memory-server": "^5.1.5",
+    "nyc": "^14.1.1"
   }
 }

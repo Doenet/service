@@ -1,14 +1,16 @@
 import express from 'express';
-const router = express.Router();
 import * as userController from './controllers/users';
 import * as learnerController from './controllers/learners';
+import * as xapiController from './controllers/xapi';
 import * as courseController from './controllers/courses';
 import identity from './middleware/identity';
 import createGuest from './middleware/guest';
 import * as iframe from './controllers/iframe';
 
-router.get('/iframe.html', iframe.html );
-router.get('/iframe.js', iframe.js );
+const router = express.Router();
+
+router.get('/iframe.html', iframe.html);
+router.get('/iframe.js', iframe.js);
 
 // ## GET /users/:user/authentication
 //
@@ -17,11 +19,11 @@ router.get('/iframe.js', iframe.js );
 
 router.get('/users/:user/token', userController.findUser, userController.token);
 
-router.use( identity );
-router.use( createGuest );
+router.use(identity);
+router.use(createGuest);
 
 // ## GET /users/:user
-// 
+//
 // get information about a user
 router.get('/users/:user', userController.findUser, userController.get);
 
@@ -33,29 +35,36 @@ router.put('/users/:user', userController.findUser, userController.put);
 router.patch('/users/:user', userController.findUser, userController.put);
 
 // ## PUT /learners/:user/progress
-// 
+//
 // Record progress on this worksheet, as defined by the Referer header.
-// 
+//
 // (Test to ensure that Origin is consistent with Referer.)
 
-router.put('/learners/:user/progress', userController.findUser, learnerController.putProgress);
-router.get('/learners/:user/progress', userController.findUser, learnerController.getProgress);
+router.put('/learners/:user/worksheets/:worksheet/progress', userController.findUser, learnerController.findWorksheet, learnerController.putProgress);
+router.get('/learners/:user/worksheets/:worksheet/progress', userController.findUser, learnerController.findWorksheet, learnerController.getProgress);
 
 // ## POST /learners/:user/worksheets/:worksheet/statements
 // ## POST /learners/:user/worksheets/:worksheet/progress
 
+
 // ## POST /learners/:user/statements
+// Record a learner event (meaning an xAPI statement)
 
-router.post('/learners/:user/statements', userController.findUser, learnerController.postStatement);
+router.post('/learners/:user/worksheets/:worksheet/statements', userController.findUser, learnerController.findWorksheet, xapiController.postStatement);
 
-// Record a learner event (like an xAPI statement or progress).
-// If no cookie is set, a set-cookie is sent for a guest user.
+// ## GET a handful of recent statements for a given learner
+router.get('/learners/:user/statements', userController.findUser, xapiController.getRecentStatements);
+
+// ## GET a single statement
+router.get('/learners/:user/statements/:statement', userController.findUser, learnerController.findWorksheet, xapiController.getStatement);
+router.get('/learners/:user/worksheets/:worksheet/statements/:statement', userController.findUser, learnerController.findWorksheet, xapiController.getStatement);
+router.get('/statements/:statement', xapiController.getStatement);
 
 // ## PUT /learners/:user/worksheets/:worksheet/state
 // Record the page state for the given worksheet.
 
-router.put('/learners/:user/state', userController.findUser, learnerController.putState);
-router.get('/learners/:user/state', userController.findUser, learnerController.getState);
+router.put('/learners/:user/worksheets/:worksheet/state', userController.findUser, learnerController.findWorksheet, learnerController.putState);
+router.get('/learners/:user/worksheets/:worksheet/state', userController.findUser, learnerController.findWorksheet, learnerController.getState);
 
 // ## POST /courses
 router.post('/courses', courseController.createCourse);
@@ -70,38 +79,38 @@ router.get('/courses/:course', courseController.findCourse, courseController.get
 
 // GET /courses/:course/learners
 router.get('/courses/:course/learners',
-           courseController.findCourse,
-           courseController.getLearners);
+  courseController.findCourse,
+  courseController.getLearners);
 
 // GET /courses/:course/learners
 router.get('/courses/:course/instructors',
-           courseController.findCourse,
-           courseController.getInstructors);
+  courseController.findCourse,
+  courseController.getInstructors);
 
 // POST /courses/:course/instructors/:user
 router.post('/courses/:course/instructors/:user',
-            userController.findUser, courseController.findCourse,
-            courseController.addInstructor);
+  userController.findUser, courseController.findCourse,
+  courseController.addInstructor);
 
 router.delete('/courses/:course/instructors/:user',
-              userController.findUser, courseController.findCourse,
-              courseController.removeInstructor);
+  userController.findUser, courseController.findCourse,
+  courseController.removeInstructor);
 
 // POST /courses/:course/learners/:user
 router.post('/courses/:course/learners/:user',
-            userController.findUser, courseController.findCourse,
-            courseController.addLearner);
+  userController.findUser, courseController.findCourse,
+  courseController.addLearner);
 
 router.delete('/courses/:course/learners/:user',
-              userController.findUser, courseController.findCourse,
-              courseController.removeLearner);
+  userController.findUser, courseController.findCourse,
+  courseController.removeLearner);
 
 router.get('/learners/:user/courses',
-            userController.findUser,
-            courseController.getLearnerCourses);
+  userController.findUser,
+  courseController.getLearnerCourses);
 
 router.get('/instructors/:user/courses',
-            userController.findUser,
-            courseController.getInstructorCourses);
+  userController.findUser,
+  courseController.getInstructorCourses);
 
 export default router;

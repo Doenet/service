@@ -13,34 +13,34 @@ const UserSchema = new Schema({
     type: String,
     maxlength: 65536,
   },
-  
+
   // the email is also the username, but not required because guests don't have an email
   email: {
     type: String,
     trim: true,
     // required: true,
-    // unique: true    
+    // unique: true
   },
-  
+
   guest: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   isInstructor: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   gpdrConsent: {
     type: Boolean,
-    default: false,    
+    default: false,
   },
 
   gpdrConsentDate: {
-    type: Date
+    type: Date,
   },
-  
+
   /*
   instructorFor: [{
     type: Schema.Types.ObjectId,
@@ -52,7 +52,7 @@ const UserSchema = new Schema({
     ref: 'Course'
   }],
   */
-  
+
   password: {
     type: String,
     trim: true,
@@ -61,10 +61,10 @@ const UserSchema = new Schema({
 }, { timestamps: true });
 
 // because we permit user look-ups based on email
-UserSchema.index({"email": 1});
+UserSchema.index({ email: 1 });
 
 // hash user password before database save
-UserSchema.pre('save', function(next){
+UserSchema.pre('save', function (next) {
   if (!this.isModified('password')) {
     return next();
   }
@@ -77,16 +77,16 @@ UserSchema.pre('save', function(next){
 });
 
 
-UserSchema.methods.canView = function(anotherUser) {
+UserSchema.methods.canView = function (anotherUser) {
   if (this._id.equals(anotherUser._id)) return true;
 
   return false;
 };
 
 UserSchema.methods.canViewLearnerCourseList = UserSchema.methods.canView;
-  
-UserSchema.methods.canEdit = function(anotherUser) {
-  if (this._id.equals(anotherUser._id)) return true;  
+
+UserSchema.methods.canEdit = function (anotherUser) {
+  if (this._id.equals(anotherUser._id)) return true;
 
   return false;
 };
@@ -97,8 +97,8 @@ UserSchema.methods.canViewCourse = yes;
 UserSchema.methods.canViewInstructorList = yes;
 UserSchema.methods.canViewInstructorCourseList = yes;
 
-UserSchema.methods.isInstructorFor = function(course) {
-  return course.instructors.indexOf( this.id ) >= 0;
+UserSchema.methods.isInstructorFor = function (course) {
+  return course.instructors.indexOf(this.id) >= 0;
 };
 
 UserSchema.methods.canUpdateCourse = UserSchema.methods.isInstructorFor;
@@ -106,19 +106,18 @@ UserSchema.methods.canAddInstructor = UserSchema.methods.isInstructorFor;
 UserSchema.methods.canViewLearnerList = UserSchema.methods.isInstructorFor;
 
 // people can add themselves to courses, but no one else
-UserSchema.methods.canAddLearner = function(course, learner) {
-  if (this._id.equals(learner._id))
-    return true;
+UserSchema.methods.canAddLearner = function (course, learner) {
+  // A learner can add themself to a course if it is enrollable
+  if (this._id.equals(learner._id) && course.enrollable) return true;
 
   return false;
 };
 
-UserSchema.methods.canRemoveInstructor = function(course, instructor) {
+UserSchema.methods.canRemoveInstructor = function (course, instructor) {
   // Only instructors can remove instructors
   if (this.isInstructorFor(course)) {
     // Do not permit an instructor to remove the last instructor
-    if (course.instructors.length == 1)
-      return false;
+    if (course.instructors.length == 1) return false;
 
     return true;
   }
@@ -126,28 +125,31 @@ UserSchema.methods.canRemoveInstructor = function(course, instructor) {
   return false;
 };
 
-UserSchema.methods.canRemoveLearner = function(course, learner) {
-  if (this._id.equals(learner._id))
-    return true;
+UserSchema.methods.canRemoveLearner = function (course, learner) {
+  if (this._id.equals(learner._id)) return true;
 
-  if (this.isInstructorFor(course))
-    return true;
+  if (this.isInstructorFor(course)) return true;
 
   return false;
 };
 
+UserSchema.methods.canViewStatement = function (statement) {
+  if (this._id.equals(statement.actor)) return true;
+
+  return false;
+};
 
 UserSchema.methods.canPutProgress = UserSchema.methods.canEdit;
 
 UserSchema.methods.canPostStatement = UserSchema.methods.canEdit;
 
 UserSchema.set('toJSON', {
-     transform: function (doc, ret, options) {
-       ret.id = ret._id;
-       delete ret._id;       
-       delete ret.__v;
-       delete ret.password;       
-     }
+  transform(doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+    delete ret.password;
+  },
 });
 
 export default model('User', UserSchema);

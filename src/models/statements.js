@@ -6,25 +6,30 @@ const StatementSchema = new Schema({
     required: true,
     index: true,
   },
-  
+
   // The specification would require us to use an "Inverse Functional
   // Identifier" for doenet; the only IFI we would be using would have
-  // its "homePage" pointing to us anyway
+  // its "homePage" pointing to us anyway, so we just point directly
+  // to a user by their id.
   actor: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
 
-  ////////////////////////////////////////////////////////////////
+  // //////////////////////////////////////////////////////////////
   // Below is the xAPI specification of a Statement, minus "actor"
 
-  verb: { type: Object,
-          required: true },
+  verb: {
+    type: Object,
+    required: true,
+  },
 
-  object: { type: Object,
-            required: true },
-  
+  object: {
+    type: Object,
+    required: true,
+  },
+
   result: { type: Object },
   context: { type: Object },
 
@@ -35,23 +40,24 @@ const StatementSchema = new Schema({
   timestamp: { type: Date },
 
   // we're not storing authority
-  //// authority: { type: Object },
+  // // authority: { type: Object },
 
   // we're not permitting attachments
-  //// attachments: { type: [Object] },
-  
+  // // attachments: { type: [Object] },
+
 }, { timestamps: { createdAt: 'stored', updatedAt: null } });
 
-StatementSchema.index( { "worksheet": 1 } );
+StatementSchema.index({ worksheet: 1 });
+StatementSchema.index({ actor: 1 });
 
 // the "id" is a UUID assigned by LRS if not set by the Learning
 // Record Provider; doenet does not permit providers to provide an id
 StatementSchema.set('toJSON', {
-     transform: function (doc, ret, options) {
-         ret.id = ret._id;
-         delete ret._id;
-         delete ret.__v;
-     }
+  transform(doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
 });
 
 export default model('Statement', StatementSchema);
