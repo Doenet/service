@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import app from './app';
-import mongoose from './config/database';
+import mongoose from './config/mongoose';
+import client from './config/redis';
 
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 

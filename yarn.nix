@@ -1738,6 +1738,14 @@
       };
     }
     {
+      name = "double_ended_queue___double_ended_queue_2.1.0_0.tgz";
+      path = fetchurl {
+        name = "double_ended_queue___double_ended_queue_2.1.0_0.tgz";
+        url  = "https://registry.yarnpkg.com/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz";
+        sha1 = "103d3527fd31528f40188130c841efdd78264e5c";
+      };
+    }
+    {
       name = "ecdsa_sig_formatter___ecdsa_sig_formatter_1.0.11.tgz";
       path = fetchurl {
         name = "ecdsa_sig_formatter___ecdsa_sig_formatter_1.0.11.tgz";
@@ -4351,6 +4359,30 @@
         name = "readdirp___readdirp_2.2.1.tgz";
         url  = "https://registry.yarnpkg.com/readdirp/-/readdirp-2.2.1.tgz";
         sha1 = "0e87622a3325aa33e892285caf8b4e846529a525";
+      };
+    }
+    {
+      name = "redis_commands___redis_commands_1.5.0.tgz";
+      path = fetchurl {
+        name = "redis_commands___redis_commands_1.5.0.tgz";
+        url  = "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.5.0.tgz";
+        sha1 = "80d2e20698fe688f227127ff9e5164a7dd17e785";
+      };
+    }
+    {
+      name = "redis_parser___redis_parser_2.6.0.tgz";
+      path = fetchurl {
+        name = "redis_parser___redis_parser_2.6.0.tgz";
+        url  = "https://registry.yarnpkg.com/redis-parser/-/redis-parser-2.6.0.tgz";
+        sha1 = "52ed09dacac108f1a631c07e9b69941e7a19504b";
+      };
+    }
+    {
+      name = "redis___redis_2.8.0.tgz";
+      path = fetchurl {
+        name = "redis___redis_2.8.0.tgz";
+        url  = "https://registry.yarnpkg.com/redis/-/redis-2.8.0.tgz";
+        sha1 = "202288e3f58c49f6079d97af7a10e1303ae14b02";
       };
     }
     {
