@@ -7,7 +7,7 @@ import router from './routes';
 
 const app = express();
 
-app.set('secretKey','notvertysecret');
+app.set('secretKey', process.env.SECRET);
 
 app.use(logger('dev'));
 
@@ -23,8 +23,8 @@ app.use(bodyParser.json());
 // access control check: The value of the
 // 'Access-Control-Allow-Origin' header in the response must not be
 // the wildcard '*' when the request's credentials mode is 'include'."
-app.use(cookieParser()); 
+app.use(cookieParser());
 
-app.use( '/', router );
+app.use('/', router);
 
 export default app;

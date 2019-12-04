@@ -1730,6 +1730,14 @@
       };
     }
     {
+      name = "dotenv___dotenv_8.2.0.tgz";
+      path = fetchurl {
+        name = "dotenv___dotenv_8.2.0.tgz";
+        url  = "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz";
+        sha1 = "97e619259ada750eea3e4ea3e26bceea5424b16a";
+      };
+    }
+    {
       name = "ecdsa_sig_formatter___ecdsa_sig_formatter_1.0.11.tgz";
       path = fetchurl {
         name = "ecdsa_sig_formatter___ecdsa_sig_formatter_1.0.11.tgz";
