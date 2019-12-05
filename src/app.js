@@ -1,15 +1,21 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import logger from 'morgan';
 import cors from 'cors';
+import morgan from 'morgan';
 import router from './routes';
+
+import logger from './logger';
 
 const app = express();
 
 app.set('secretKey', process.env.SECRET);
 
-app.use(logger('dev'));
+if (process.env.NODE_ENV == 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined', { stream: logger.stream }));
+}
 
 // enable all CORS requests
 app.options('*', cors());
