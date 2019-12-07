@@ -38,9 +38,13 @@ redis.
 
 ### PATCH /learners/:user/worksheets/:worksheet/state/:uuid
 
-Submit a jsondiffpatch, and receive a jsondiffpatch to apply.  By
-repeatedly sending empty PATCHes, a client can poll the server for
-changes to page state.  (These also serve as heartbeats.)
+Submit a jsondiffpatch, and receive a jsondiffpatch to apply.
+
+The request body consists of the output of `jsondiffpatch.diff`, with
+a header `Doenet-Shadow-Checksum` which is the shadow's `object-hash`.
+
+By sending empty PATCHes, a client can poll the server for changes to
+page state.  (These also serve as heartbeats.)
 
 ### POST /learners/:user/worksheets/:worksheet/statements
 

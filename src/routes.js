@@ -59,11 +59,11 @@ router.get('/learners/:user/statements/:statement', userController.findUser, lea
 router.get('/learners/:user/worksheets/:worksheet/statements/:statement', userController.findUser, learnerController.findWorksheet, xapiController.getStatement);
 router.get('/statements/:statement', xapiController.getStatement);
 
-// ## PUT /learners/:user/worksheets/:worksheet/state
-// Record the page state for the given worksheet.
+// ## PATCH and GET /learners/:user/worksheets/:worksheet/state/:uuid
+// Fetch or update the page state for the given worksheet.
 
-router.put('/learners/:user/worksheets/:worksheet/state', userController.findUser, learnerController.findWorksheet, learnerController.putState);
-router.get('/learners/:user/worksheets/:worksheet/state', userController.findUser, learnerController.findWorksheet, learnerController.getState);
+router.patch('/learners/:user/worksheets/:worksheet/state/:uuid', userController.findUser, learnerController.findWorksheet, learnerController.patchState);
+router.get('/learners/:user/worksheets/:worksheet/state/:uuid', userController.findUser, learnerController.findWorksheet, learnerController.getState);
 
 // ## POST /courses
 router.post('/courses', courseController.createCourse);

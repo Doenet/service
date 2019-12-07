@@ -39,12 +39,16 @@ function getsetProgress(verb, event, parameters, hash) {
 
   xhr.onload = function () {
     if (xhr.status === 200) {
-      const body = JSON.parse(xhr.responseText);
-      if (body && body.score) {
-        event.source.postMessage({
-          message: 'setProgress',
-          parameters: { score: body.score },
-        }, event.origin);
+      try {
+        const body = JSON.parse(xhr.responseText);
+        if (body && body.score) {
+          event.source.postMessage({
+            message: 'setProgress',
+            parameters: { score: body.score },
+          }, event.origin);
+        }
+      } catch (err) {
+        throw new Error(`doenet iframe: ${err}`);
       }
     } else {
       throw new Error(`doenet iframe: Request failed to ${url} with status ${xhr.status}`);
@@ -102,10 +106,101 @@ function recordStatement(event, parameters, hash) {
   }
 }
 
+function getState(event, parameters, hash) {
+  const xhr = new XMLHttpRequest();
+
+  if (typeof parameters.uuid !== 'string') {
+    throw new Error('doenet iframe: expecting UUID to be a string');
+  }
+
+  const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+  if (parameters.uuid.match(v4) === null) {
+    throw new Error('doenet iframe: expecting UUID to be an RFC4122 version 4 UUID');
+  }
+
+  const url = `/learners/me/worksheets/${hash}/state/${parameters.uuid}`;
+  xhr.open('GET', url);
+
+  xhr.onload = function () {
+    if (xhr.status !== 200) {
+      throw new Error(`doenet iframe: Request failed to ${url} with status ${xhr.status}`);
+    } else {
+      try {
+        const body = JSON.parse(xhr.responseText);
+        console.log(`doenet iframe: body = ${xhr.responseText}`);
+        event.source.postMessage({
+          message: 'setState',
+          parameters: {
+            state: body,
+          },
+        }, event.origin);
+      } catch (err) {
+        throw new Error(`doenet iframe: ${err}`);
+      }
+    }
+  };
+
+  xhr.send();
+}
+
+function patchState(event, parameters, hash) {
+  const xhr = new XMLHttpRequest();
+
+  if (typeof parameters.uuid !== 'string') {
+    throw new Error('doenet iframe: expecting UUID to be a string');
+  }
+
+  const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+  if (parameters.uuid.match(v4) === null) {
+    throw new Error('doenet iframe: expecting UUID to be an RFC4122 version 4 UUID');
+  }
+
+  const url = `/learners/me/worksheets/${hash}/state/${parameters.uuid}`;
+  xhr.open('PATCH', url);
+
+  xhr.onload = function () {
+    if (xhr.status !== 200) {
+      // One common error is that the server could not apply the patch for some reason; we request the full state
+      if (xhr.status === 422) {
+        getState(event, parameters, hash);
+      } else {
+        throw new Error(`doenet iframe: Request failed to ${url} with status ${xhr.status} ${xhr.responseText}`);
+      }
+    } else {
+      try {
+        const body = JSON.parse(xhr.responseText);
+        event.source.postMessage({
+          message: 'patchState',
+          parameters: {
+            delta: body,
+            checksum: xhr.getResponseHeader('Doenet-Shadow-Checksum'),
+          },
+        }, event.origin);
+      } catch (err) {
+        throw new Error(`doenet iframe: ${err}`);
+      }
+    }
+  };
+
+  if (typeof parameters.checksum !== 'string') {
+    throw new Error('doenet iframe: expecting checksum to be a string');
+  }
+
+  if (parameters.checksum.match(new RegExp(/^[0-9A-F]{40}$/i)) === null) {
+    throw new Error('doenet iframe: expecting checksum to be 40 hex digits');
+  }
+
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Doenet-Shadow-Checksum', parameters.checksum);
+  xhr.send(JSON.stringify(parameters.delta));
+}
+
 const messages = {
   setProgress,
   getProgress,
   recordStatement,
+  getState,
+  patchState,
 };
 
 function receiveMessage(event) {

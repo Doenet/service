@@ -1,37 +1,33 @@
 import mongoose from 'mongoose';
 
-// REDIS_HOST=localhost
-// REDIS_PORT=27017
-// REDIS_PASS=thepassword
-
-const mongodb_database = process.env.MONGODB_DATABASE;
-const mongodb_pass = process.env.MONGODB_PASS;
-const mongodb_user = process.env.MONGODB_USER;
-const mongodb_host = process.env.MONGODB_HOST;
-const mongodb_port = process.env.MONGODB_PORT;
+const { MONGODB_DATABASE } = process.env;
+const { MONGODB_HOST } = process.env;
+const { MONGODB_PASS } = process.env;
+const { MONGODB_PORT } = process.env;
+const { MONGODB_USER } = process.env;
 
 let mongoDB = 'mongodb://';
 
-if (mongodb_user) {
-  mongoDB += mongodb_user;
-  if (mongodb_pass) {
-    mongoDB = `${mongoDB}:${mongodb_pass}`;
+if (MONGODB_USER) {
+  mongoDB += MONGODB_USER;
+  if (MONGODB_PASS) {
+    mongoDB = `${mongoDB}:${MONGODB_PASS}`;
   }
   mongoDB += '@';
 }
 
-if (mongodb_host) {
-  mongoDB += mongodb_host;
+if (MONGODB_HOST) {
+  mongoDB += MONGODB_HOST;
 } else {
   mongoDB += 'localhost';
 }
 
-if (mongodb_port) {
-  mongoDB = `${mongoDB}:${mongodb_port}`;
+if (MONGODB_PORT) {
+  mongoDB = `${mongoDB}:${MONGODB_PORT}`;
 }
 
-if (mongodb_database) {
-  mongoDB = `${mongoDB}/${mongodb_database}`;
+if (MONGODB_DATABASE) {
+  mongoDB = `${mongoDB}/${MONGODB_DATABASE}`;
 }
 
 mongoose.set('useUnifiedTopology', true);

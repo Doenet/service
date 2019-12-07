@@ -1,8 +1,11 @@
 import shajs from 'sha.js';
+import hash from 'object-hash';
+import { diff, clone, patch } from 'jsondiffpatch';
 import userModel from '../models/users';
 import progressModel from '../models/progress';
 import stateModel from '../models/state';
 import statementModel from '../models/statements';
+import client from '../config/redis';
 
 export function findWorksheet(req, res, next) {
   if (req.params.worksheet) {
@@ -72,18 +75,111 @@ export function putProgress(req, res, next) {
   }
 }
 
-// export function getProgress(req, res, next) {
-//  return getThing(progressModel, 'progress', req, res, next);
-// }
-
-// export function putProgress(req, res, next) {
-//  return putThing(progressModel, 'progress', req, res, next);
-// }
-
 export function getState(req, res, next) {
-  return getThing(stateModel, 'state', req, res, next);
+  if (req.user) {
+    if (req.jwt && req.jwt.user) {
+      if (req.jwt.user.canViewState(req.user)) {
+        const query = {
+          user: req.user._id,
+          worksheet: req.worksheet._id,
+        };
+
+        const { uuid } = req.params;
+        const key = `shadow:${req.user._id}:${req.worksheet._id}:${uuid}`;
+
+        // FIXME: the state itself could be cached in mongo
+        stateModel.findOne(query).exec((err, state) => {
+          if (err) return res.status(500).send('Error fetching state');
+          if (state) {
+            client.set(key, JSON.stringify(state.state), 'EX', 3600);
+            return res.status(200).json(state.state);
+          }
+
+          client.set(key, '{}', 'EX', 3600);
+          return res.status(200).json({});
+        });
+      } else {
+        res.status(403).send('Not permitted to view state');
+      }
+    } else {
+      res.status(401).send('Unauthenticated');
+    }
+  } else {
+    res.status(404).send('User not found');
+  }
 }
 
-export function putState(req, res, next) {
-  return putThing(stateModel, 'state', req, res, next);
+export function patchState(req, res, next) {
+  if (req.user) {
+    if (req.jwt && req.jwt.user) {
+      if (req.jwt.user.canPatchState(req.user)) {
+        const query = {
+          user: req.user._id,
+          worksheet: req.worksheet._id,
+        };
+        stateModel.findOne(query).exec((err, stateObject) => {
+          if (err) return res.status(500).send('Error fetching server state');
+
+          let state;
+
+          // State is initialized to {}
+          if (stateObject === null) {
+            state = {};
+          } else {
+            state = stateObject.state;
+          }
+
+          const { uuid } = req.params;
+          const key = `shadow:${req.user._id}:${req.worksheet._id}:${uuid}`;
+
+          client.get(key, (err, shadowJSON) => {
+            if (err) return res.status(500).send('Error fetching shadow');
+
+            if (shadowJSON) {
+              const shadow = JSON.parse(shadowJSON);
+
+              const checksum = req.header('Doenet-Shadow-Checksum');
+              if (hash(shadow) !== checksum) {
+                return res.status(422).send('Shadow inconsistent with provided checksum');
+              }
+
+              // update the shadow, which should not fail since we
+              // verified a checksum
+              try {
+	          patch(shadow, req.body);
+              } catch (e) {
+                return res.status(500).send('Could not patch the server shadow');
+              }
+              client.set(key, JSON.stringify(shadow), 'EX', 3600);
+
+	      // fuzzypatch the true state, which can fail
+	      try {
+	        patch(state, req.body);
+	      } catch (e) {
+	      }
+              stateModel.findOneAndUpdate(query, { $set: { state } },
+                { upsert: true, new: true }, () => {
+                });
+
+              const delta = diff(shadow, state);
+
+              if (delta !== undefined) {
+                res.set('Doenet-Shadow-Checksum', hash(shadow));
+                return res.status(200).json(delta);
+	      }
+              return res.status(204); // no content!
+            }
+            // Shadow is missing -- there isn't much we can do.
+            return res.status(422).send('Missing shadow');
+          });
+        });
+      } else {
+        res.status(403).send('Not permitted to patch state');
+      }
+    } else {
+      res.status(401).send('Unauthenticated');
+    }
+  } else {
+    res.status(404).send('User not found');
+  }
 }

@@ -84,6 +84,8 @@ UserSchema.methods.canView = function (anotherUser) {
 };
 
 UserSchema.methods.canViewLearnerCourseList = UserSchema.methods.canView;
+UserSchema.methods.canViewState = UserSchema.methods.canView;
+UserSchema.methods.canPatchState = UserSchema.methods.canView;
 
 UserSchema.methods.canEdit = function (anotherUser) {
   if (this._id.equals(anotherUser._id)) return true;
