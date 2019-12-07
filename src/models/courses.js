@@ -52,7 +52,7 @@ CourseSchema.set('toJSON', {
   transform(doc, ret, options) {
     ret.id = ret._id;
 
-    for (const assignment in ret.assignments) {
+    for (const assignment of ret.assignments) {
       assignment.id = assignment._id;
       delete assignment._id;
     }

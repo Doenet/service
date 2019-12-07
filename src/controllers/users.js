@@ -100,7 +100,7 @@ export function put(req, res, next) {
 
 export function token(req, res, next) {
   const auth = (req.headers.authorization || '').split(' ')[1] || '';
-  const [login, password] = new Buffer(auth, 'base64').toString().split(':');
+  const [login, password] = Buffer.from(auth, 'base64').toString().split(':');
 
   if (login != req.params.user) {
     res.sendStatus(500);

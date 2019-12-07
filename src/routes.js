@@ -9,9 +9,6 @@ import * as iframe from './controllers/iframe';
 
 const router = express.Router();
 
-router.get('/iframe.html', iframe.html);
-router.get('/iframe.js', iframe.js);
-
 // ## GET /users/:user/authentication
 //
 // Log in as the given user.  Password is sent in the `Authorization:
@@ -21,6 +18,9 @@ router.get('/users/:user/token', userController.findUser, userController.token);
 
 router.use(identity);
 router.use(createGuest);
+
+router.get('/iframe.html', iframe.html);
+router.get('/iframe.js', iframe.js);
 
 // ## GET /users/:user
 //
@@ -45,7 +45,6 @@ router.get('/learners/:user/worksheets/:worksheet/progress', userController.find
 
 // ## POST /learners/:user/worksheets/:worksheet/statements
 // ## POST /learners/:user/worksheets/:worksheet/progress
-
 
 // ## POST /learners/:user/statements
 // Record a learner event (meaning an xAPI statement)

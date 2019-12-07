@@ -12,8 +12,7 @@
     "dev": "NODE_ENV=development npm-run-all server",
     "clean": "rimraf dist",
     "build": "babel ./src --out-dir dist",
-    "production": "NODE_ENV=production npm-run-all clean build server:production",
-    "watch": "nodemon"
+    "production": "NODE_ENV=production npm-run-all clean build server:production"
   },
   "author": "Jim Fowler <kisonecat@gmail.com>",
   "license": "AGPL-3.0-or-later",
@@ -28,6 +27,7 @@
     "mongoose": "^5.6.0",
     "morgan": "^1.9.1",
     "redis": "^2.8.0",
+    "sha.js": "^2.4.11",
     "winston-loggly-bulk": "^3.0.1",
     "yarn-run-all": "^3.1.1"
   },

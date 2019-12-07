@@ -2761,7 +2761,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@2.0.4, inherits@^2.0.3, inherits@~2.0.3:
+inherits@2, inherits@2.0.4, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.3:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
@@ -4570,7 +4570,7 @@ repeat-string@^1.6.1:
   resolved "https://registry.yarnpkg.com/repeat-string/-/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
   integrity sha1-jcrkcOHIirwtYA//Sndihtp15jc=
 
-"request@>=2.76.0 <3.0.0", request@^2.88.0:
+"request@>=2.76.0 <3.0.0":
   version "2.88.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.88.0.tgz#9c2fca4f7d35b592efe57c7f0a55e81052124fef"
   integrity sha512-NAqBSrijGLZdM0WZNsInLJpkJokL72XYjUpnB0iwsRgxh7dB6COrHnTBNwN0E+lHDAJzu7kLAkDeY08z2/A0hg==
@@ -4777,6 +4777,14 @@ setprototypeof@1.1.1:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.1.1.tgz#7e95acb24aa92f5885e0abef5ba131330d4ae683"
   integrity sha512-JvdAWfbXeIGaZ9cILp38HntZSFSo3mWg6xGcJJsd+d4aRMOqauag1C63dJfDw7OaMYwEbHMOxEZ1lqVRYP2OAw==
 
+sha.js@^2.4.11:
+  version "2.4.11"
+  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.11.tgz#37a5cf0b81ecbc6943de109ba2960d1b26584ae7"
+  integrity sha512-QMEp5B7cftE7APOjk5Y6xgrbWu+WkLVQwk8JNjZ8nKRciZaByEW6MubieAiToS7+dwvrjGhH8jRXz3MVd0AYqQ==
+  dependencies:
+    inherits "^2.0.1"
+    safe-buffer "^5.0.1"
+
 shebang-command@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/shebang-command/-/shebang-command-1.2.0.tgz#44aac65b695b03398968c39f363fee5deafdf1ea"
@@ -4952,13 +4960,6 @@ split@0.3:
   integrity sha1-zQ7qXmOiEd//frDwkcQTPi0N0o8=
   dependencies:
     through "2"
-
-splunk-logging@^0.10.1:
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/splunk-logging/-/splunk-logging-0.10.1.tgz#b5548021fb3293a853daf101831f515758b9d2e0"
-  integrity sha512-7j2vvwbLWWSPm9yHEg1XuOt4vN5zHQ6i7JMMMQd9H3nww8JKqnhavXPYv7gZ/FGcpkcmY6JwASn6I6Cbe/jO1w==
-  dependencies:
-    request "^2.88.0"
 
 sprintf-js@~1.0.2:
   version "1.0.3"
@@ -5442,13 +5443,6 @@ util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
 
-util@^0.10.3:
-  version "0.10.4"
-  resolved "https://registry.yarnpkg.com/util/-/util-0.10.4.tgz#3aa0125bfe668a4672de58857d3ace27ecb76901"
-  integrity sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==
-  dependencies:
-    inherits "2.0.3"
-
 utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
@@ -5521,15 +5515,6 @@ winston-loggly-bulk@^3.0.1:
     node-loggly-bulk "^2.0.1"
     winston "^3.0"
     winston-transport "^4.2.0"
-
-winston-splunk-httplogger@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/winston-splunk-httplogger/-/winston-splunk-httplogger-2.3.1.tgz#d4f3ebf0c7a41dbeb397343fe0d31ba94602515d"
-  integrity sha512-1kVR/bayAWfEHqXLIHBbg7M3EEf/xbp+F55ePrQugUqqQp8j+bbPLcuO//BLXx3BSgdTskJzrG86mpTJuzDnTw==
-  dependencies:
-    is-stream "^1.1.0"
-    splunk-logging "^0.10.1"
-    util "^0.10.3"
 
 winston-transport@^4.2.0, winston-transport@^4.3.0:
   version "4.3.0"

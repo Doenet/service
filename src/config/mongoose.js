@@ -34,6 +34,8 @@ if (mongodb_database) {
   mongoDB = `${mongoDB}/${mongodb_database}`;
 }
 
+mongoose.set('useUnifiedTopology', true);
+mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 mongoose.Promise = global.Promise;

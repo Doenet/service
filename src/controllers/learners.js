@@ -1,3 +1,4 @@
+import shajs from 'sha.js';
 import userModel from '../models/users';
 import progressModel from '../models/progress';
 import stateModel from '../models/state';
@@ -11,32 +12,22 @@ export function findWorksheet(req, res, next) {
   next();
 }
 
-function getWorksheet(req) {
-  // FIXME: this should be more robust, using Referer AND Origin and
-  // probably another special header (X-Doenet: url) too.
-
-  const worksheet = req.get('X-Doenet-Referer');
-
-  console.log('worksheet=', worksheet);
-
-  if (worksheet) return worksheet;
-
-  return 'undefined';
-}
-
-function getThing(model, name, req, res, next) {
+export function getProgress(req, res, next) {
   if (req.user) {
     if (req.jwt && req.jwt.user) {
       if (req.jwt.user.canView(req.user)) {
-        const query = { user: req.user._id, worksheet: req.worksheet._id };
+        const query = {
+          user: req.user._id,
+          worksheet: req.worksheet._id,
+        };
 
-        model.findOne(query).exec((err, thing) => {
-          if (err) return res.status(500).send(`Error saving ${name}`);
-          if (name == 'state') return res.json(thing.state);
-          return res.json(thing.toJSON());
+        progressModel.findOne(query).exec((err, progress) => {
+          if (err) return res.status(500).send('Error fetching progress');
+          if (progress) return res.json(progress.toJSON());
+          return res.json({ score: 0 });
         });
       } else {
-        res.status(403).send(`Not permitted to view ${name}`);
+        res.status(403).send('Not permitted to view progress');
       }
     } else {
       res.status(401).send('Unauthenticated');
@@ -46,26 +37,32 @@ function getThing(model, name, req, res, next) {
   }
 }
 
-export function putThing(model, name, req, res, next) {
+export function putProgress(req, res, next) {
   if (req.user) {
     if (req.jwt && req.jwt.user) {
       if (req.jwt.user.canPutProgress(req.user)) {
         const query = { user: req.user._id, worksheet: req.worksheet._id };
 
-        let setter = { };
+        if (shajs('sha256').update(req.body.url).digest('hex') !== req.worksheet._id) {
+          return res.status(500).send('Mismatch between hash and URL');
+        }
 
-        if (name == 'state') setter = { state: req.body };
+        const setter = {
+          // grades should be monotone increasing
+          $max: { score: req.body.score },
+          $set: {
+            title: req.body.title,
+            url: req.body.url,
+          },
+        };
 
-        if (name == 'progress') setter = { score: req.body.score };
-
-        model.findOneAndUpdate(query, { $set: setter }, { upsert: true }, (err, progress) => {
-          if (err) return res.status(500).send(`Error saving ${name}`);
-
-          if (name == 'state') return res.json(setter.state);
-          return res.json(progress.toJSON());
-        });
+        progressModel.findOneAndUpdate(query, setter,
+          { upsert: true, new: true }, (err, progress) => {
+            if (err) return res.status(500).send('Error saving progress');
+            return res.json(progress.toJSON());
+          });
       } else {
-        res.status(403).send(`Not permitted to update ${name}`);
+        res.status(403).send('Not permitted to update progress');
       }
     } else {
       res.status(401).send('Unauthenticated');
@@ -75,13 +72,13 @@ export function putThing(model, name, req, res, next) {
   }
 }
 
-export function getProgress(req, res, next) {
-  return getThing(progressModel, 'progress', req, res, next);
-}
+// export function getProgress(req, res, next) {
+//  return getThing(progressModel, 'progress', req, res, next);
+// }
 
-export function putProgress(req, res, next) {
-  return putThing(progressModel, 'progress', req, res, next);
-}
+// export function putProgress(req, res, next) {
+//  return putThing(progressModel, 'progress', req, res, next);
+// }
 
 export function getState(req, res, next) {
   return getThing(stateModel, 'state', req, res, next);

@@ -117,7 +117,7 @@ UserSchema.methods.canRemoveInstructor = function (course, instructor) {
   // Only instructors can remove instructors
   if (this.isInstructorFor(course)) {
     // Do not permit an instructor to remove the last instructor
-    if (course.instructors.length == 1) return false;
+    if (course.instructors.length === 1) return false;
 
     return true;
   }
