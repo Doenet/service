@@ -110,6 +110,9 @@ export function getState(req, res, next) {
 }
 
 export function patchState(req, res, next) {
+  let thePatch = req.body;
+  if (req.header('Content-Type') !== 'application/json') thePatch = undefined;
+
   if (req.user) {
     if (req.jwt && req.jwt.user) {
       if (req.jwt.user.canPatchState(req.user)) {
@@ -143,31 +146,38 @@ export function patchState(req, res, next) {
                 return res.status(422).send('Shadow inconsistent with provided checksum');
               }
 
-              // update the shadow, which should not fail since we
-              // verified a checksum
-              try {
-	          patch(shadow, req.body);
-              } catch (e) {
-                return res.status(500).send('Could not patch the server shadow');
+              // Only patch if we have a patch
+              if (thePatch !== undefined) {
+                // update the shadow, which should not fail since we
+                // verified a checksum
+                try {
+	          patch(shadow, thePatch);
+                } catch (e) {
+                  return res.status(500).send('Could not patch the server shadow');
+                }
+                client.set(key, JSON.stringify(shadow), 'EX', 3600);
+
+	        // fuzzypatch the true state, which can fail
+	        try {
+	          patch(state, thePatch);
+	        } catch (e) {
+	        }
+
+                stateObject.state = state;
+                stateObject.save(() => {});
               }
-              client.set(key, JSON.stringify(shadow), 'EX', 3600);
 
-	      // fuzzypatch the true state, which can fail
-	      try {
-	        patch(state, req.body);
-	      } catch (e) {
-	      }
-              stateModel.findOneAndUpdate(query, { $set: { state } },
-                { upsert: true, new: true }, () => {
-                });
-
+              // Send the client any updates, in the form of a patch
               const delta = diff(shadow, state);
 
               if (delta !== undefined) {
+                client.set(key, JSON.stringify(state), 'EX', 3600);
                 res.set('Doenet-Shadow-Checksum', hash(shadow));
                 return res.status(200).json(delta);
 	      }
-              return res.status(204); // no content!
+
+              // we're in sync, so send "no content"
+              return res.status(204).send();
             }
             // Shadow is missing -- there isn't much we can do.
             return res.status(422).send('Missing shadow');

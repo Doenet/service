@@ -21,8 +21,8 @@ if (process.env.NODE_ENV == 'development') {
 app.options('*', cors());
 app.use(cors());
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ strict: false }));
 
 // cookies actually aren't used in light of CORS, but we do use them
 // in the tests.  Indeed, "Response to preflight request doesn't pass

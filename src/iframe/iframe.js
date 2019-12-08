@@ -190,9 +190,15 @@ function patchState(event, parameters, hash) {
     throw new Error('doenet iframe: expecting checksum to be 40 hex digits');
   }
 
-  xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.setRequestHeader('Doenet-Shadow-Checksum', parameters.checksum);
-  xhr.send(JSON.stringify(parameters.delta));
+
+  if (parameters.delta) {
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify(parameters.delta));
+  } else {
+    console.log('Sendnig an empty patch');
+    xhr.send('');
+  }
 }
 
 const messages = {
