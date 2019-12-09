@@ -127,10 +127,11 @@ export function patchState(req, res, next) {
 
           // State is initialized to {}
           if (stateObject === null) {
-            state = {};
-          } else {
-            state = stateObject.state;
+            stateObject = new stateModel(query);
+            stateObject.state = {};
           }
+
+          state = stateObject.state;
 
           const { uuid } = req.params;
           const key = `shadow:${req.user._id}:${req.worksheet._id}:${uuid}`;
