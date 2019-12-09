@@ -1,6 +1,6 @@
 { stdenv, yarn2nix }:
 yarn2nix.mkYarnPackage rec {
-    name = "doenet-lrs";
+    name = "doenet-service";
     src = ./.;
     packageJSON = ./package.json;
     yarnLock = ./yarn.lock;
@@ -9,10 +9,15 @@ yarn2nix.mkYarnPackage rec {
       NODE_ENV=production yarn run build
     '';
 
+    postInstall = ''
+      mkdir $out/dist
+      cp $src/src/iframe/iframe.js $out/dist
+    '';
+
     meta = with stdenv.lib; {
-      description = "Learning record store for Doenet";
+      description = "Doenet web services";
       license = licenses.agpl3;
-      homepage = "https://github.com/doenet/lrs";
+      homepage = "https://github.com/doenet/service";
       maintainers = with maintainers; [ kisonecat ];
       platforms = platforms.linux;
     };

@@ -33,7 +33,10 @@ if (MONGODB_DATABASE) {
 mongoose.set('useUnifiedTopology', true);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
-mongoose.connect(mongoDB, { useNewUrlParser: true });
+
 mongoose.Promise = global.Promise;
+
+mongoose.connect(mongoDB, { useNewUrlParser: true })
+  .catch((error) => { console.log(error); });
 
 export default mongoose;
