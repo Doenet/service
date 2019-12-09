@@ -198,7 +198,7 @@ function patchState(event, parameters, hash) {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(parameters.delta));
   } else {
-    console.log('Sendnig an empty patch');
+    // Sending an empty patch
     xhr.send('');
   }
 }
