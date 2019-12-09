@@ -161,7 +161,9 @@ function patchState(event, parameters, hash) {
   xhr.onload = function () {
     if (xhr.status !== 200) {
       // One common error is that the server could not apply the patch for some reason; we request the full state
-      if (xhr.status === 422) {
+      if (xhr.status === 204) {
+        // we do nothing, because the received patch was empty so we are up to date
+      } else if (xhr.status === 422) {
         getState(event, parameters, hash);
       } else {
         throw new Error(`doenet iframe: Request failed to ${url} with status ${xhr.status} ${xhr.responseText}`);

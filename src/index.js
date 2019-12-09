@@ -6,6 +6,7 @@ import client from './config/redis';
 
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT, () => {
   console.log(`Node server listening on port ${process.env.PORT}`);
 });
+

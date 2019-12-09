@@ -1,6 +1,6 @@
 {
-  "name": "@doenet/lrs",
-  "version": "0.0.1",
+  "name": "@doenet/service",
+  "version": "1.0.0",
   "description": "Learner record store and page state store",
   "main": "src/index.js",
   "bin": "dist/index.js",
@@ -14,7 +14,11 @@
     "build": "babel ./src --out-dir dist",
     "production": "NODE_ENV=production npm-run-all clean build server:production"
   },
-  "author": "Jim Fowler <kisonecat@gmail.com>",
+  "author": {
+    "name": "Jim Fowler",
+    "email": "kisonecat@gmail.com",
+    "url": "http://kisonecat.com/"
+  },
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "bcryptjs": "^2.4.3",

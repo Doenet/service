@@ -698,6 +698,14 @@
       };
     }
     {
+      name = "agentkeepalive___agentkeepalive_4.1.0.tgz";
+      path = fetchurl {
+        name = "agentkeepalive___agentkeepalive_4.1.0.tgz";
+        url  = "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.1.0.tgz";
+        sha1 = "a48e040ed16745dd29ce923675f60c9c90f39ee0";
+      };
+    }
+    {
       name = "ajv___ajv_6.10.2.tgz";
       path = fetchurl {
         name = "ajv___ajv_6.10.2.tgz";
@@ -1850,6 +1858,14 @@
       };
     }
     {
+      name = "diff_match_patch___diff_match_patch_1.0.4.tgz";
+      path = fetchurl {
+        name = "diff_match_patch___diff_match_patch_1.0.4.tgz";
+        url  = "https://registry.yarnpkg.com/diff-match-patch/-/diff-match-patch-1.0.4.tgz";
+        sha1 = "6ac4b55237463761c4daf0dc603eb869124744b1";
+      };
+    }
+    {
       name = "diff___diff_3.5.0.tgz";
       path = fetchurl {
         name = "diff___diff_3.5.0.tgz";
@@ -2882,6 +2898,14 @@
       };
     }
     {
+      name = "humanize_ms___humanize_ms_1.2.1.tgz";
+      path = fetchurl {
+        name = "humanize_ms___humanize_ms_1.2.1.tgz";
+        url  = "https://registry.yarnpkg.com/humanize-ms/-/humanize-ms-1.2.1.tgz";
+        sha1 = "c46e3159a293f6b896da29316d8b6fe8bb79bbed";
+      };
+    }
+    {
       name = "iconv_lite___iconv_lite_0.4.24.tgz";
       path = fetchurl {
         name = "iconv_lite___iconv_lite_0.4.24.tgz";
@@ -3431,6 +3455,14 @@
         name = "json5___json5_2.1.1.tgz";
         url  = "https://registry.yarnpkg.com/json5/-/json5-2.1.1.tgz";
         sha1 = "81b6cb04e9ba496f1c7005d07b4368a2638f90b6";
+      };
+    }
+    {
+      name = "jsondiffpatch___jsondiffpatch_0.3.11.tgz";
+      path = fetchurl {
+        name = "jsondiffpatch___jsondiffpatch_0.3.11.tgz";
+        url  = "https://registry.yarnpkg.com/jsondiffpatch/-/jsondiffpatch-0.3.11.tgz";
+        sha1 = "43f9443a0d081b5f79d413fe20f302079e493201";
       };
     }
     {
@@ -4207,6 +4239,14 @@
         name = "object_copy___object_copy_0.1.0.tgz";
         url  = "https://registry.yarnpkg.com/object-copy/-/object-copy-0.1.0.tgz";
         sha1 = "7e7d858b781bd7c991a41ba975ed3812754e998c";
+      };
+    }
+    {
+      name = "object_hash___object_hash_2.0.1.tgz";
+      path = fetchurl {
+        name = "object_hash___object_hash_2.0.1.tgz";
+        url  = "https://registry.yarnpkg.com/object-hash/-/object-hash-2.0.1.tgz";
+        sha1 = "cef18a0c940cc60aa27965ecf49b782cbf101d96";
       };
     }
     {
@@ -5234,6 +5274,14 @@
       };
     }
     {
+      name = "sha.js___sha.js_2.4.11.tgz";
+      path = fetchurl {
+        name = "sha.js___sha.js_2.4.11.tgz";
+        url  = "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.11.tgz";
+        sha1 = "37a5cf0b81ecbc6943de109ba2960d1b26584ae7";
+      };
+    }
+    {
       name = "shebang_command___shebang_command_1.2.0.tgz";
       path = fetchurl {
         name = "shebang_command___shebang_command_1.2.0.tgz";
@@ -5431,14 +5479,6 @@
         name = "split___split_0.3.3.tgz";
         url  = "https://registry.yarnpkg.com/split/-/split-0.3.3.tgz";
         sha1 = "cd0eea5e63a211dfff7eb0f091c4133e2d0dd28f";
-      };
-    }
-    {
-      name = "splunk_logging___splunk_logging_0.10.1.tgz";
-      path = fetchurl {
-        name = "splunk_logging___splunk_logging_0.10.1.tgz";
-        url  = "https://registry.yarnpkg.com/splunk-logging/-/splunk-logging-0.10.1.tgz";
-        sha1 = "b5548021fb3293a853daf101831f515758b9d2e0";
       };
     }
     {
@@ -5986,14 +6026,6 @@
       };
     }
     {
-      name = "util___util_0.10.4.tgz";
-      path = fetchurl {
-        name = "util___util_0.10.4.tgz";
-        url  = "https://registry.yarnpkg.com/util/-/util-0.10.4.tgz";
-        sha1 = "3aa0125bfe668a4672de58857d3ace27ecb76901";
-      };
-    }
-    {
       name = "utils_merge___utils_merge_1.0.1.tgz";
       path = fetchurl {
         name = "utils_merge___utils_merge_1.0.1.tgz";
@@ -6079,14 +6111,6 @@
         name = "winston_loggly_bulk___winston_loggly_bulk_3.0.1.tgz";
         url  = "https://registry.yarnpkg.com/winston-loggly-bulk/-/winston-loggly-bulk-3.0.1.tgz";
         sha1 = "a633232595a0625eef7e944f7481750bf3497c26";
-      };
-    }
-    {
-      name = "winston_splunk_httplogger___winston_splunk_httplogger_2.3.1.tgz";
-      path = fetchurl {
-        name = "winston_splunk_httplogger___winston_splunk_httplogger_2.3.1.tgz";
-        url  = "https://registry.yarnpkg.com/winston-splunk-httplogger/-/winston-splunk-httplogger-2.3.1.tgz";
-        sha1 = "d4f3ebf0c7a41dbeb397343fe0d31ba94602515d";
       };
     }
     {
