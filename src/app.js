@@ -17,9 +17,22 @@ if (process.env.NODE_ENV == 'development') {
   app.use(morgan('combined', { stream: logger.stream }));
 }
 
-// enable all CORS requests
-app.options('*', cors());
-app.use(cors());
+const allowedOrigins = ['http://localhost:4000',
+  'https://api.doenet.cloud',
+  'https://doenet.cloud'];
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('Access not permitted from the specific Origin'),
+        false);
+    }
+
+    return callback(null, true);
+  },
+}));
 
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ strict: false }));
