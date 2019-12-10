@@ -32,12 +32,12 @@ const UserSchema = new Schema({
     default: false,
   },
 
-  gpdrConsent: {
+  gdprConsent: {
     type: Boolean,
     default: false,
   },
 
-  gpdrConsentDate: {
+  gdprConsentDate: {
     type: Date,
   },
 

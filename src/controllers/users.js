@@ -71,12 +71,12 @@ export function put(req, res, next) {
           req.user.isInstructor = req.body.isInstructor;
         }
 
-        if ('gpdrConsent' in req.body) {
-          if (req.body.gpdrConsent && !(req.user.gpdrConsent)) {
-            req.user.gpdrConsentDate = Date.now();
+        if ('gdprConsent' in req.body) {
+          if (req.body.gdprConsent && !(req.user.gdprConsent)) {
+            req.user.gdprConsentDate = Date.now();
           }
 
-          req.user.gpdrConsent = req.body.gpdrConsent;
+          req.user.gdprConsent = req.body.gdprConsent;
         }
 
         req.user.save()
