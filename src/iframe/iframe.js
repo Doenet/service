@@ -106,7 +106,7 @@ function recordStatement(event, parameters, hash) {
   }
 }
 
-function getState(event, parameters, hash) {
+function getLocalGlobalState(isLocal, event, parameters, hash) {
   const xhr = new XMLHttpRequest();
 
   if (typeof parameters.uuid !== 'string') {
@@ -118,7 +118,9 @@ function getState(event, parameters, hash) {
     throw new Error('doenet iframe: expecting UUID to be an RFC4122 version 4 UUID');
   }
 
-  const url = `/learners/me/worksheets/${hash}/state/${parameters.uuid}`;
+  let url = `/worksheets/${hash}/state/${parameters.uuid}`;
+  if (isLocal) url = `/learners/me${url}`;
+
   xhr.open('GET', url);
 
   xhr.onload = function () {
@@ -129,7 +131,7 @@ function getState(event, parameters, hash) {
         const body = JSON.parse(xhr.responseText);
         console.log(`doenet iframe: body = ${xhr.responseText}`);
         event.source.postMessage({
-          message: 'setState',
+          message: isLocal ? 'setState' : 'setGlobalState',
           parameters: {
             state: body,
           },
@@ -143,7 +145,7 @@ function getState(event, parameters, hash) {
   xhr.send();
 }
 
-function patchState(event, parameters, hash) {
+function patchLocalGlobalState(isLocal, event, parameters, hash) {
   const xhr = new XMLHttpRequest();
 
   if (typeof parameters.uuid !== 'string') {
@@ -155,7 +157,9 @@ function patchState(event, parameters, hash) {
     throw new Error('doenet iframe: expecting UUID to be an RFC4122 version 4 UUID');
   }
 
-  const url = `/learners/me/worksheets/${hash}/state/${parameters.uuid}`;
+  let url = `/worksheets/${hash}/state/${parameters.uuid}`;
+  if (isLocal) url = `/learners/me${url}`;
+
   xhr.open('PATCH', url);
 
   xhr.onload = function () {
@@ -164,7 +168,7 @@ function patchState(event, parameters, hash) {
       if (xhr.status === 204) {
         // we do nothing, because the received patch was empty so we are up to date
       } else if (xhr.status === 422) {
-        getState(event, parameters, hash);
+        getLocalGlobalState(isLocal, event, parameters, hash);
       } else {
         throw new Error(`doenet iframe: Request failed to ${url} with status ${xhr.status} ${xhr.responseText}`);
       }
@@ -172,7 +176,7 @@ function patchState(event, parameters, hash) {
       try {
         const body = JSON.parse(xhr.responseText);
         event.source.postMessage({
-          message: 'patchState',
+          message: isLocal ? 'patchState' : 'patchGlobalState',
           parameters: {
             delta: body,
             checksum: xhr.getResponseHeader('Doenet-Shadow-Checksum'),
@@ -203,12 +207,27 @@ function patchState(event, parameters, hash) {
   }
 }
 
+function patchState(event, parameters, hash) {
+  return patchLocalGlobalState(true, event, parameters, hash);
+}
+function getState(event, parameters, hash) {
+  return getLocalGlobalState(true, event, parameters, hash);
+}
+function patchGlobalState(event, parameters, hash) {
+  return patchLocalGlobalState(false, event, parameters, hash);
+}
+function getGlobalState(event, parameters, hash) {
+  return getLocalGlobalState(false, event, parameters, hash);
+}
+
 const messages = {
   setProgress,
   getProgress,
   recordStatement,
   getState,
   patchState,
+  getGlobalState,
+  patchGlobalState,
 };
 
 function receiveMessage(event) {

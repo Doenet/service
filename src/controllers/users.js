@@ -108,7 +108,7 @@ export function token(req, res, next) {
     if (bcrypt.compareSync(password, req.user.password)) {
       const token = jwt.sign({ id: req.user._id }, req.app.get('secretKey'), { expiresIn: '1d' });
       delete req.user.password;
-      res.cookie('token', token);
+      res.cookie('token', token, { maxAge: 86400000, httpOnly: true });
       res.json({ token });
     } else {
       res.status(401).send('Invalid credentials');

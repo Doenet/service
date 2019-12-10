@@ -27,14 +27,18 @@ Retrieve or record progress on this worksheet.
 
 ### GET /learners/:user/worksheets/:worksheet/state/:uuid
 
-Fetch page state for the given worksheet; this establishes a diffsync
-shadow, tied to the given uuid.
+Fetch page state for the given worksheet and user; this establishes a
+diffsync shadow, tied to the given uuid.
 
 (The storage event fires when other tabs makes changes to
 localStorage. This is quite handy for communication purposes.)
 
 The server stores page state in mongo, but the shadows are stored in
 redis.
+
+### GET /worksheets/:worksheet/state/:uuid
+
+Fetch the **global** page state for the given worksheet.
 
 ### PATCH /learners/:user/worksheets/:worksheet/state/:uuid
 
@@ -45,6 +49,11 @@ a header `Doenet-Shadow-Checksum` which is the shadow's `object-hash`.
 
 By sending empty PATCHes, a client can poll the server for changes to
 page state.  (These also serve as heartbeats.)
+
+### PATCH /worksheets/:worksheet/state/:uuid
+
+Submit a jsondiffpatch for the **global** page state for the given
+worksheet, and receive a jsondiffpatch to apply.
 
 ### POST /learners/:user/worksheets/:worksheet/statements
 

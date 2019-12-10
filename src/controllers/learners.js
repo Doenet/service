@@ -76,36 +76,38 @@ export function putProgress(req, res, next) {
 }
 
 export function getState(req, res, next) {
-  if (req.user) {
-    if (req.jwt && req.jwt.user) {
-      if (req.jwt.user.canViewState(req.user)) {
-        const query = {
-          user: req.user._id,
-          worksheet: req.worksheet._id,
-        };
+  if (req.jwt && req.jwt.user) {
+    if ((req.user === undefined) || req.jwt.user.canViewState(req.user)) {
+      const query = {
+        worksheet: req.worksheet._id,
+        user: null,
+      };
+      let userId = '';
 
-        const { uuid } = req.params;
-        const key = `shadow:${req.user._id}:${req.worksheet._id}:${uuid}`;
-
-        // FIXME: the state itself could be cached in mongo
-        stateModel.findOne(query).exec((err, state) => {
-          if (err) return res.status(500).send('Error fetching state');
-          if (state) {
-            client.set(key, JSON.stringify(state.state), 'EX', 3600);
-            return res.status(200).json(state.state);
-          }
-
-          client.set(key, '{}', 'EX', 3600);
-          return res.status(200).json({});
-        });
-      } else {
-        res.status(403).send('Not permitted to view state');
+      if (req.user) {
+        query.user = req.user._id;
+        userId = `${req.user._id}:`;
       }
+
+      const { uuid } = req.params;
+      const key = `shadow:${userId}${req.worksheet._id}:${uuid}`;
+
+      // FIXME: the state itself could be cached in mongo
+      stateModel.findOne(query).exec((err, state) => {
+        if (err) return res.status(500).send('Error fetching state');
+        if (state) {
+          client.set(key, JSON.stringify(state.state), 'EX', 3600);
+          return res.status(200).json(state.state);
+        }
+
+        client.set(key, '{}', 'EX', 3600);
+        return res.status(200).json({});
+      });
     } else {
-      res.status(401).send('Unauthenticated');
+      res.status(403).send('Not permitted to view state');
     }
   } else {
-    res.status(404).send('User not found');
+    res.status(401).send('Unauthenticated');
   }
 }
 
@@ -113,84 +115,87 @@ export function patchState(req, res, next) {
   let thePatch = req.body;
   if (req.header('Content-Type') !== 'application/json') thePatch = undefined;
 
-  if (req.user) {
-    if (req.jwt && req.jwt.user) {
-      if (req.jwt.user.canPatchState(req.user)) {
-        const query = {
-          user: req.user._id,
-          worksheet: req.worksheet._id,
-        };
-        stateModel.findOne(query).exec((err, stateObject) => {
-          if (err) return res.status(500).send('Error fetching server state');
+  if (req.jwt && req.jwt.user) {
+    if ((req.user === undefined) || req.jwt.user.canPatchState(req.user)) {
+      const query = {
+        worksheet: req.worksheet._id,
+        user: null,
+      };
+      let userId = '';
 
-          let state;
+      if (req.user) {
+        query.user = req.user._id;
+        userId = `${req.user._id}:`;
+      }
 
-          // State is initialized to {}
-          if (stateObject === null) {
-            stateObject = new stateModel(query);
-            stateObject.state = {};
-          }
+      stateModel.findOne(query).exec((err, stateObject) => {
+        if (err) return res.status(500).send('Error fetching server state');
 
-          state = stateObject.state;
+        let state;
 
-          const { uuid } = req.params;
-          const key = `shadow:${req.user._id}:${req.worksheet._id}:${uuid}`;
+        // State is initialized to {}
+        if (stateObject === null) {
+          stateObject = new stateModel(query);
+          stateObject.state = {};
+        }
 
-          client.get(key, (err, shadowJSON) => {
-            if (err) return res.status(500).send('Error fetching shadow');
+        state = stateObject.state;
 
-            if (shadowJSON) {
-              const shadow = JSON.parse(shadowJSON);
+        const { uuid } = req.params;
+        const key = `shadow:${userId}${req.worksheet._id}:${uuid}`;
 
-              const checksum = req.header('Doenet-Shadow-Checksum');
-              if (hash(shadow) !== checksum) {
-                return res.status(422).send('Shadow inconsistent with provided checksum');
+        client.get(key, (err, shadowJSON) => {
+          if (err) return res.status(500).send('Error fetching shadow');
+
+          if (shadowJSON) {
+            const shadow = JSON.parse(shadowJSON);
+
+            const checksum = req.header('Doenet-Shadow-Checksum');
+            if (hash(shadow) !== checksum) {
+              return res.status(422).send('Shadow inconsistent with provided checksum');
+            }
+
+            // Only patch if we have a patch
+            if (thePatch !== undefined) {
+              // update the shadow, which should not fail since we
+              // verified a checksum
+              try {
+	        patch(shadow, thePatch);
+              } catch (e) {
+                return res.status(500).send('Could not patch the server shadow');
               }
+              client.set(key, JSON.stringify(shadow), 'EX', 3600);
 
-              // Only patch if we have a patch
-              if (thePatch !== undefined) {
-                // update the shadow, which should not fail since we
-                // verified a checksum
-                try {
-	          patch(shadow, thePatch);
-                } catch (e) {
-                  return res.status(500).send('Could not patch the server shadow');
-                }
-                client.set(key, JSON.stringify(shadow), 'EX', 3600);
-
-	        // fuzzypatch the true state, which can fail
-	        try {
-	          patch(state, thePatch);
-	        } catch (e) {
-	        }
-
-                stateObject.state = state;
-                stateObject.save(() => {});
-              }
-
-              // Send the client any updates, in the form of a patch
-              const delta = diff(shadow, state);
-
-              if (delta !== undefined) {
-                client.set(key, JSON.stringify(state), 'EX', 3600);
-                res.set('Doenet-Shadow-Checksum', hash(shadow));
-                return res.status(200).json(delta);
+	      // fuzzypatch the true state, which can fail
+	      try {
+	        patch(state, thePatch);
+	      } catch (e) {
 	      }
 
-              // we're in sync, so send "no content"
-              return res.status(204).send();
+              stateObject.state = state;
+              stateObject.save(() => {});
             }
-            // Shadow is missing -- there isn't much we can do.
-            return res.status(422).send('Missing shadow');
-          });
+
+            // Send the client any updates, in the form of a patch
+            const delta = diff(shadow, state);
+
+            if (delta !== undefined) {
+              client.set(key, JSON.stringify(state), 'EX', 3600);
+              res.set('Doenet-Shadow-Checksum', hash(shadow));
+              return res.status(200).json(delta);
+	    }
+
+            // we're in sync, so send "no content"
+            return res.status(204).send();
+          }
+          // Shadow is missing -- there isn't much we can do.
+          return res.status(422).send('Missing shadow');
         });
-      } else {
-        res.status(403).send('Not permitted to patch state');
-      }
+      });
     } else {
-      res.status(401).send('Unauthenticated');
+      res.status(403).send('Not permitted to patch state');
     }
   } else {
-    res.status(404).send('User not found');
+    res.status(401).send('Unauthenticated');
   }
 }

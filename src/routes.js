@@ -65,6 +65,11 @@ router.get('/statements/:statement', xapiController.getStatement);
 router.patch('/learners/:user/worksheets/:worksheet/state/:uuid', userController.findUser, learnerController.findWorksheet, learnerController.patchState);
 router.get('/learners/:user/worksheets/:worksheet/state/:uuid', userController.findUser, learnerController.findWorksheet, learnerController.getState);
 
+// Fetch or update the page state for the given worksheet.
+
+router.patch('/worksheets/:worksheet/state/:uuid', learnerController.findWorksheet, learnerController.patchState);
+router.get('/worksheets/:worksheet/state/:uuid', learnerController.findWorksheet, learnerController.getState);
+
 // ## POST /courses
 router.post('/courses', courseController.createCourse);
 
