@@ -8,6 +8,7 @@ function createGuest(req, res, next) {
     return;
   }
 
+  console.log('Creating guest!');
   const guest = new userModel({ guest: true });
 
   guest.save((err) => {
@@ -15,7 +16,7 @@ function createGuest(req, res, next) {
     else {
       req.jwt = { user: guest };
       const token = jwt.sign({ id: req.jwt.user._id }, req.app.get('secretKey'), { expiresIn: '1y' });
-      res.cookie('token', token);
+      res.cookie('token', token, { maxAge: 2630000, httpOnly: true });
     }
 
     next();
