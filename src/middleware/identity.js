@@ -27,8 +27,6 @@ function validateUser(req, res, next) {
         res.status(401).json({ status: 'error', message: err.message, data: null });
       } else {
         userModel.findById(decoded.id, (err, user) => {
-          console.log('GOT USER=', user);
-
           if (user) {
             delete user.password;
             req.jwt = { user };

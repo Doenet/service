@@ -6,6 +6,9 @@ export function html(req, res, next) {
 
   if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
     name = req.jwt.user.firstName;
+  }
+
+  if (req.jwt && req.jwt.user) {
     url = `https://doenet.cloud/users/${req.jwt.user._id}`;
   }
 

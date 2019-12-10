@@ -8,7 +8,6 @@ function createGuest(req, res, next) {
     return;
   }
 
-  console.log('Creating guest!');
   const guest = new userModel({ guest: true });
 
   guest.save((err) => {
