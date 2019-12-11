@@ -12,9 +12,16 @@ const router = express.Router();
 // ## GET /users/:user/authentication
 //
 // Log in as the given user.  Password is sent in the `Authorization:
-// Basic` header.  Responds by setting a cookie containing a JWT.
+// Basic` header.  Responds by returning a JWT.
 
 router.get('/users/:user/token', userController.findUser, userController.token);
+
+// ## GET /users/:user/authorize
+//
+// Log in as the given user.  Password is sent in the `Authorization:
+// Basic` header.  Responds by setting a cookie containing a JWT.
+
+router.get('/users/:user/authorize', userController.findUser, userController.authorize);
 
 router.use(identity);
 router.use(createGuest);

@@ -16,6 +16,12 @@ update a user
 ### GET /users/:user/token
 
 Log in as the given user.  Password is sent in the `Authorization:
+Basic` header.  Responds by returning a token in the body containing a
+JWT.
+
+### GET /users/:user/authorize
+
+Log in as the given user.  Password is sent in the `Authorization:
 Basic` header.  Responds by setting a cookie containing a JWT.
 
 ## Learners, progress, page state, statements

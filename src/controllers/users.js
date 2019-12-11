@@ -98,7 +98,7 @@ export function put(req, res, next) {
   }
 }
 
-export function token(req, res, next) {
+function generateJWT(req, res, callback) {
   const auth = (req.headers.authorization || '').split(' ')[1] || '';
   const [login, password] = Buffer.from(auth, 'base64').toString().split(':');
 
@@ -108,10 +108,25 @@ export function token(req, res, next) {
     if (bcrypt.compareSync(password, req.user.password)) {
       const token = jwt.sign({ id: req.user._id }, req.app.get('secretKey'), { expiresIn: '1d' });
       delete req.user.password;
-      res.cookie('token', token, { maxAge: 86400000, httpOnly: true });
-      res.json({ token });
+      // res.cookie('token', token, { maxAge: 86400000, httpOnly: true });
+      callback(null, token);
     } else {
       res.status(401).send('Invalid credentials');
     }
   }
+}
+
+export function authorize(req, res, next) {
+  generateJWT(req, res, (err, token) => {
+    if (err) res.status(500).send('Could not generate JWT');
+    // express records maxAge in milliseconds to be consistent with javascript mroe generally
+    else res.cookie('token', token, { maxAge: 86400000, httpOnly: true });
+  });
+}
+
+export function token(req, res, next) {
+  generateJWT(req, res, (err, token) => {
+    if (err) res.status(500).send('Could not generate JWT');
+    else res.json({ token });
+  });
 }
