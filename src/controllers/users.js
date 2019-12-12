@@ -120,7 +120,7 @@ export function authorize(req, res, next) {
   generateJWT(req, res, (err, token) => {
     if (err) res.status(500).send('Could not generate JWT');
     // express records maxAge in milliseconds to be consistent with javascript mroe generally
-    else res.cookie('token', token, { maxAge: 86400000, httpOnly: true });
+    else res.cookie('token', token, { maxAge: 604800000, httpOnly: true });
   });
 }
 
