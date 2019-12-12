@@ -15,6 +15,30 @@ export function findWorksheet(req, res, next) {
   next();
 }
 
+export function getRecentProgress(req, res, next) {
+  if (req.user) {
+    if (req.jwt && req.jwt.user) {
+      if (req.jwt.user.canView(req.user)) {
+        const query = {
+          user: req.user._id,
+        };
+
+        progressModel.find(query).sort({ _id: -1 }).limit(10).exec((err, progresses) => {
+          if (err) return res.status(500).send('Error fetching progress');
+          if (progresses) return res.json(progresses.map((progress) => progress.toJSON()));
+          return res.json([]);
+        });
+      } else {
+        res.status(403).send('Not permitted to view progress');
+      }
+    } else {
+      res.status(401).send('Unauthenticated');
+    }
+  } else {
+    res.status(404).send('User not found');
+  }
+}
+
 export function getProgress(req, res, next) {
   if (req.user) {
     if (req.jwt && req.jwt.user) {

@@ -14,7 +14,7 @@ const ProgressSchema = new Schema({
     index: true,
   },
 
-  name: {
+  title: {
     type: String,
     required: true,
     trim: true,

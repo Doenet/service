@@ -49,6 +49,7 @@ router.patch('/users/:user', userController.findUser, userController.put);
 
 router.put('/learners/:user/worksheets/:worksheet/progress', userController.findUser, learnerController.findWorksheet, learnerController.putProgress);
 router.get('/learners/:user/worksheets/:worksheet/progress', userController.findUser, learnerController.findWorksheet, learnerController.getProgress);
+router.get('/learners/:user/progress', userController.findUser, learnerController.getRecentProgress);
 
 // ## POST /learners/:user/worksheets/:worksheet/statements
 // ## POST /learners/:user/worksheets/:worksheet/progress
