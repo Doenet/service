@@ -37,7 +37,7 @@ export function findUser(req, res, next) {
 
 export function get(req, res, next) {
   if (req.user) {
-    if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
+    if (req.jwt && req.jwt.user) {
       if (req.jwt.user.canView(req.user)) {
         res.json(req.user.toJSON());
       } else {
@@ -53,7 +53,7 @@ export function get(req, res, next) {
 
 export function put(req, res, next) {
   if (req.user) {
-    if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
+    if (req.jwt && req.jwt.user) {
       if (req.jwt.user.canEdit(req.user)) {
         if (req.body.firstName) {
           req.user.firstName = req.body.firstName;

@@ -8,8 +8,7 @@
     "test": "nyc mocha --exit --require @babel/register test",
     "start": "npm run production",
     "server": "babel-node -r node_modules/dotenv/config ./src/index",
-    "server:production": "node ./dist/index",
-    "dev": "NODE_ENV=development npm-run-all server",
+    "serve": "NODE_ENV=development npm-run-all server",
     "clean": "rimraf dist",
     "build": "babel ./src --out-dir dist",
     "production": "NODE_ENV=production npm-run-all clean build server:production"

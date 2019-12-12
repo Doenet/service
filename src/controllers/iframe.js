@@ -2,14 +2,12 @@ import path from 'path';
 
 export function html(req, res, next) {
   let name = 'Anonymous';
-  let url = 'https://doenet.cloud/';
+  let url = process.env.ATLAS_URL;
 
-  if (req.jwt && req.jwt.user && !req.jwt.user.guest) {
-    name = req.jwt.user.firstName;
-  }
+  if (req.jwt && req.jwt.user && req.jwt.user.firstName) name = req.jwt.user.firstName;
 
   if (req.jwt && req.jwt.user) {
-    url = `https://doenet.cloud/users/${req.jwt.user._id}`;
+    url = `${url}users/${req.jwt.user._id}`;
   }
 
   res.set('Content-Type', 'text/html');
