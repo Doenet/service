@@ -16,7 +16,7 @@ function createGuest(req, res, next) {
       req.jwt = { user: guest };
       const token = jwt.sign({ id: req.jwt.user._id }, req.app.get('secretKey'), { expiresIn: '1y' });
       res.cookie('token', token, {
-        maxAge: 31556952000, httpOnly: true, secure: true, SameSite: 'None',
+        maxAge: 31556952000, httpOnly: true, secure: true, sameSite: 'None',
       });
     }
 

@@ -122,7 +122,7 @@ export function authorize(req, res, next) {
     // express records maxAge in milliseconds to be consistent with javascript mroe generally
     else {
       res.cookie('token', token, {
-        maxAge: 31556952000, httpOnly: true, SameSite: 'None', secure: true,
+        maxAge: 31556952000, httpOnly: true, sameSite: 'None', secure: true,
       });
     }
   });
