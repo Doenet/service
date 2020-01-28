@@ -55,31 +55,6 @@ to the given `id`, with each node represented by its URL.  The
 `content-type` is `application/vnd.doenet.nodes+json`.
 
 ### PUT /keys/:key
-=======
-`DOENET_K` is the size of the k-buckets.
-
-`DOENET_ALPHA` is the desired concurrency parameter.
-
-## RPC endpoints
-
-### GET /:name/status
-
-Some information about the status of the network.
-
-### GET /:name/ping
-
-Verify that a Doenet node is alive.
-
-### GET /:name/nodes/:id
-
-This is Kademlia's `FIND_NODE`.  The `:id` is a 64-byte (hex-encoded) node id.
-
-The response is a JSON array of the `k` nodes with their `id` closest
-to the given `id`, with each node represented by its URL.
-
-The `content-type` is `application/vnd.doenet.nodes+json`.
-
-### PUT /:name/keys/:key
 
 Store the request body (probably encoded as JSON) at the given `:key`,
 which is a 64-byte (hex-encoded) id.
