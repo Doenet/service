@@ -1,4 +1,5 @@
 import express from 'express';
+import url from 'url';
 import * as userController from './controllers/users';
 import * as learnerController from './controllers/learners';
 import * as xapiController from './controllers/xapi';
@@ -6,8 +7,34 @@ import * as courseController from './controllers/courses';
 import identity from './middleware/identity';
 import createGuest from './middleware/guest';
 import * as iframe from './controllers/iframe';
+import * as dht from './controllers/dht';
 
 const router = express.Router();
+
+// ## GET /status
+let nodeName = '/dht';
+if (process.env.DOENET_NODE) {
+  nodeName = url.parse(process.env.DOENET_NODE).pathname;
+}
+console.log('nodeName=', nodeName);
+
+router.get('/test/find_node', dht.testFindNode);
+router.get('/test/find_value', dht.testFindValue);
+router.get('/test/store', dht.testStore);
+
+router.get(`${nodeName}/status`, dht.status);
+
+// ## GET /ping
+router.get(`${nodeName}/ping`, dht.ping);
+
+// ## GET /nodes/:id
+router.get(`${nodeName}/nodes/:id`, dht.findNode);
+
+// ## PUT /keys/:key
+router.put(`${nodeName}/keys/:key`, dht.store);
+
+// ## GET /keys/:key
+router.get(`${nodeName}/keys/:key`, dht.findValue);
 
 // ## GET /users/:user/authentication
 //

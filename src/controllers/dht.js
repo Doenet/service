@@ -12,8 +12,16 @@ let axiosInstance;
 
 // When we `rememberNode` we also end up calling `rpcPing` so we don't
 // want to remember nodes just because we pinged them.
-async function rpcPing( node ) {
-  return axiosInstance.get( `${node}/ping` );
+function rpcPing( node ) {
+  return new Promise( (resolve, reject) => {
+    axiosInstance.get( `${node}/ping` )
+      .then( (response) => {
+        resolve(true);
+      })
+      .catch( (error) => {
+        resolve(false);
+      });
+  });
 }
 
 function rpcFindNode( node, needle ) {
@@ -46,8 +54,9 @@ function rpcFindValue( node, key ) {
 
 function rpcStore( node, key, value ) {
   return new Promise( (resolve, reject) => {
-    axiosInstance.put( `${node}/keys/${key}`, value )
+    axiosInstance.put( `${node}/keys/${key}`, { data: value } )
       .then( (response) => {
+        console.log(`asking dht@${node}[${key}] = ${value}`);
         rememberNode(node);
         resolve(response.data);
       })
@@ -155,15 +164,12 @@ async function rememberNode(node) {
       // node.
       let oldest = (await client.zpopmin( bucketKey ))[0];
       
-      rpcPing( oldest )
-        .then(function (response) {
-          // the old server is still up, so update it
-          client.zadd( bucketKey, Date.now(), oldest );
-        })
-        .catch(function (error) {
-          // The old server is dead -- add the new one.
-          client.zadd( bucketKey, Date.now(), node );          
-        });
+      if (await rpcPing( oldest ))
+        // the old server is still up, so update it
+        client.zadd( bucketKey, Date.now(), oldest );
+      else
+        // The old server is dead -- add the new one.
+        client.zadd( bucketKey, Date.now(), node );          
     }
   }
 }
@@ -192,6 +198,13 @@ export function bootstrap(server) {
     for( let peer of process.env.DOENET_BOOTSTRAP.split(' ')) {
       rpcPing( peer ).then( (response) => {
         rememberNode( peer );
+        rpcFindNode( peer, hash(thisNode) ).then( (nodes) => {
+          for( let node of nodes ) {
+            rpcPing( node ).then( (response) => {
+              rememberNode( node );
+            });
+          }
+        });
       });
     }
   }
@@ -242,6 +255,7 @@ export async function testStore(req, res, next) {
   await setItem( key, value );
 
   output += `<h1>${thisNode}</h1>`;
+  output += `<h2>dht[${key}] = ${value}</h2>`;  
   output += `<h2>my database</h2>`;
   output += `<table>`;
   
@@ -323,11 +337,24 @@ async function* closestNodesToKey( key ) {
                            Buffer.from(key, 'hex') );
   let nodes = [];
 
-  while( bucket >= 0 ) {
-    yield* ( await client.zrange(`bucket:${hash(thisNode)}:${bucket}`, 0, -1) );
-    bucket--;
+  while( bucket < 256 ) {
+    let nodes = await client.zrange(`bucket:${hash(thisNode)}:${bucket}`, 0, -1);
+    console.log(`@${thisNode} found ${nodes} in bucket ${bucket}`);
+    yield* nodes;
+    bucket++;
   }
 
+  bucket = commonBits( Buffer.from(hash(thisNode), 'hex'),
+                           Buffer.from(key, 'hex') );
+  bucket--;
+  
+  while( bucket >= 0 ) {
+    let nodes = await client.zrange(`bucket:${hash(thisNode)}:${bucket}`, 0, -1);
+    console.log(`@${thisNode} found ${nodes} in bucket ${bucket}`);
+    yield* nodes;
+    bucket--;
+  }
+  
   return;
 }
 
@@ -392,12 +419,15 @@ export async function store(req, res, next) {
     if (key.length != 64) {
       throw new Error('Keys must be 256-bits long');
     }
+
+    let stringified = JSON.stringify(req.body.data);
     
-    if (JSON.stringify(req.body).length > 1024) {
+    if (stringified.length > 1024) {
       throw new Error('Unwilling to store more than 1kb of data in the DHT');
     }
-    
-    await fake.set(`dht:${key}`, JSON.stringify(req.body), 'EX', 86400);
+
+    console.log(`setting dht@${thisNode}[${key}] = ${stringified}`);
+    await client.set(`dht:${key}`, stringified, 'EX', 86400 * 7);
       
     res.status(200).send({});
   } catch (error) {
@@ -417,10 +447,10 @@ export async function findValue(req, res, next) {
       return;
     }
 
-    let value = await fake.get(`dht:${key}`);
+    let value = await client.get(`dht:${key}`);
 
     if (value) {
-      res.status(200).json(result);
+      res.status(200).contentType('application/json').send(value);
     } else {
       findNode(req, res, next);
     }
@@ -449,6 +479,7 @@ async function nodeLookup(key) {
   let concurrentCount = 0;
   for await (let node of closestNodesToKey( key )) {
     fetched[node] = true;
+    console.log(`asking @${node} for ${key}`);
     fetches.push( rpcFindNode( node, key ) );
     concurrentCount++;
     totalFetches++;
@@ -480,19 +511,22 @@ export async function setItem(key, value) {
 
   if (key.length != 64) {
     throw new Error('Keys must be 256-bits long');
-    return;
+    return undefined;
   }
 
   // Find the k closest nodes to key, and store the value there
   let count = 0;
   let puts = [];
+
+  console.log(`Searching @${thisNode} for nodes near ${key}`);
   for (let node of (await nodeLookup( key ))) {
+    console.log(`found node ${node}`);
     puts.push( rpcStore( node, key, value ) );
     count++;    
     if (count > bucketSize) break;
   }
 
-  return Promise.all(puts);
+  return await Promise.all(puts);
 }
 
 export async function getItem(key) {
@@ -501,7 +535,7 @@ export async function getItem(key) {
 
   if (key.length != 64) {
     throw new Error('Keys must be 256-bits long');
-    return;
+    return undefined;
   }
 
   // Find the k closest nodes to key, and try to get the value there
@@ -513,7 +547,7 @@ export async function getItem(key) {
     if (count > bucketSize) break;
   }
 
-  return Promise.all(puts);
+  return await Promise.all(puts);
 }
 
 

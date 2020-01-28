@@ -5,7 +5,7 @@ const { promisify } = require('util');
 const redis = {};
 
 for (const method in client) {
-  redis[method] = promisify(client[method]).bind(client);
+  if (typeof client[method] === 'function') { redis[method] = promisify(client[method]).bind(client); }
 }
 
 // redis.set = promisify(client.set).bind(client);

@@ -3,6 +3,7 @@
 import app from './app';
 import mongoose from './config/mongoose';
 import client from './config/redis';
+import * as dht from './controllers/dht';
 
 process.on('uncaughtException', (err, origin) => {
   console.log(err);
@@ -22,5 +23,7 @@ mongoose.connection.on('error', err => {
 mongoose.connection.on('connected', function () {
   const server = app.listen(process.env.PORT, () => {
     console.log(`Node server listening on port ${process.env.PORT}`);
+
+    dht.bootstrap(server);
   });
 });
