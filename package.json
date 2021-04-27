@@ -32,7 +32,7 @@
     "mongoose": "^5.6.0",
     "morgan": "^1.9.1",
     "object-hash": "^2.0.1",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "sha.js": "^2.4.11",
     "winston-loggly-bulk": "^3.0.1",
     "yarn-run-all": "^3.1.1"
