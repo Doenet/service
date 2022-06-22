@@ -944,11 +944,6 @@ async@^2.6.1:
   dependencies:
     lodash "^4.17.14"
 
-async@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/async/-/async-3.1.1.tgz#dd3542db03de837979c9ebbca64ca01b06dc98df"
-  integrity sha512-X5Dj8hK1pJNC2Wzo2Rcp9FBVdJMGRR/S7V+lH46s8GVFhtbo5O4Le5GECCF/8PISVdkUA6mMPvgz7qTTD1rf1g==
-
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -4835,9 +4830,9 @@ shebang-regex@^1.0.0:
   integrity sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=
 
 shell-quote@^1.6.1:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.7.2.tgz#67a7d02c76c9da24f99d20808fcaded0e0e04be2"
-  integrity sha512-mRz/m/JVscCrkMyPqHc/bczi3OQHkLTqXHEFu0zDhK/qfv3UcOA4SVmRCLmos4bhjr9ekVQubj/R7waKapmiQg==
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.7.3.tgz#aa40edac170445b9a431e17bb62c0b881b9c4123"
+  integrity sha512-Vpfqwm4EnqGdlsBFNmHhxhElJYrdfcxPThu+ryKS5J8L/fhAwLazFZtq+S+TWZ9ANj2piSQLGj6NQg+lKPmxrw==
 
 sift@7.0.1:
   version "7.0.1"
